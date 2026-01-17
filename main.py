@@ -7,10 +7,13 @@ text/protobuf-debug-string format rather than binary protobuf, so we can
 parse it with simple regular expressions instead of a protobuf library.
 """
 
+import json
 import re
 import urllib.request
+from collections import Counter
 
 DEBUG_URL = "https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions/debug"
+OUTPUT_PATH = "vehicles.json"
 
 # Each vehicle entry in the debug text looks roughly like:
 #
@@ -46,6 +49,37 @@ def fetch_debug_text(url: str) -> str:
         return response.read().decode("utf-8")
 
 
+# Authoritative route classification, taken from the `route_type` column of
+# routes.txt in the GTFS static feed:
+#   https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
+# route_type 2 = Rail, 0 = Tram/Light rail; everything else in the Adelaide
+# feed is a bus variant (3 = Bus, 701 = Regional bus, 712 = School bus).
+#
+# These sets are hardcoded because the rail/tram networks are small and stable
+# (11 rail + 3 tram route IDs) while the static feed is a ~17 MB download.
+# Regenerate by reading route_type from routes.txt if the network changes.
+#
+# NOTE: do NOT infer type from the shape of the ID. Adelaide uses letter
+# prefixes for *bus* corridors (G10, H33, J1, M44, W90, X30), so a rule like
+# "letter-prefixed means train" misclassifies hundreds of buses as trains.
+RAIL_ROUTES = frozenset({
+    "BEL", "FLNDRS", "GAW", "GAWC", "GRNG", "NOAR",
+    "OSBORN", "OUTHA", "PTDOCK", "SALIS", "SEAFRD",
+})
+TRAM_ROUTES = frozenset({"BTANIC", "FESTVL", "GLNELG"})
+
+
+def classify_vehicle(route_id: str) -> str:
+    """Map a GTFS route_id to a broad vehicle type for map display."""
+    if not route_id:
+        return "unknown"
+    if route_id in RAIL_ROUTES:
+        return "train"
+    if route_id in TRAM_ROUTES:
+        return "tram"
+    return "bus"
+
+
 def parse_vehicles(text: str) -> list[dict]:
     """
     Split the feed on each "entity {" block and pull out the fields we
@@ -61,15 +95,18 @@ def parse_vehicles(text: str) -> list[dict]:
         lon_match = LON_RE.search(block)
         route_match = ROUTE_ID_RE.search(block)
         vehicle_id_match = VEHICLE_ID_RE.search(block)
+        route_id = route_match.group(1) if route_match else None
 
         vehicles.append({
             "latitude": float(lat_match.group(1)) if lat_match else None,
             "longitude": float(lon_match.group(1)) if lon_match else None,
-            "route_id": route_match.group(1) if route_match else None,
+            "route_id": route_id,
             "vehicle_id": vehicle_id_match.group(1) if vehicle_id_match else None,
+            "type": classify_vehicle(route_id),
         })
 
-    return vehicles
+    # Markers need coordinates, so drop any entries missing lat/lon.
+    return [v for v in vehicles if v["latitude"] is not None and v["longitude"] is not None]
 
 
 def main():
@@ -80,6 +117,16 @@ def main():
         print(v)
 
     print(f"\nTotal vehicles found: {len(vehicles)}")
+
+    # Print a per-type breakdown; an implausible count here (e.g. hundreds of
+    # trains on an 11-line network) is a quick signal that classification broke.
+    counts = Counter(v["type"] for v in vehicles)
+    for vehicle_type, count in counts.most_common():
+        print(f"  {vehicle_type}: {count}")
+
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(vehicles, f, indent=2)
+    print(f"Wrote static snapshot to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

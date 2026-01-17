@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Adelaide Metro - Vehicle Map</title>
+
+<!-- Leaflet is a lightweight open-source mapping library, loaded from its CDN. -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  html, body { height: 100%; margin: 0; font-family: sans-serif; }
+  #map { height: 100%; width: 100%; }
+  .legend {
+    background: white;
+    padding: 8px 12px;
+    line-height: 1.6;
+    font-size: 14px;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .legend span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // Adelaide city centre, used as the initial map view.
+  const ADELAIDE_CENTER = [-34.9285, 138.6007];
+
+  // Colour used per vehicle type, matched to main.py's classify_vehicle().
+  const TYPE_COLORS = {
+    bus: "#1f77b4",
+    train: "#d62728",
+    tram: "#2ca02c",
+    unknown: "#7f7f7f",
+  };
+
+  const map = L.map("map").setView(ADELAIDE_CENTER, 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
+
+  // Static snapshot produced by main.py (python main.py writes vehicles.json).
+  fetch("vehicles.json")
+    .then((response) => response.json())
+    .then((vehicles) => {
+      vehicles.forEach((v) => {
+        L.circleMarker([v.latitude, v.longitude], {
+          radius: 6,
+          color: TYPE_COLORS[v.type] || TYPE_COLORS.unknown,
+          fillColor: TYPE_COLORS[v.type] || TYPE_COLORS.unknown,
+          fillOpacity: 0.8,
+        })
+          .addTo(map)
+          .bindPopup(
+            `<b>${v.type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
+          );
+      });
+
+      document.title = `Adelaide Metro - ${vehicles.length} vehicles`;
+    })
+    .catch((err) => {
+      console.error("Failed to load vehicles.json:", err);
+      alert("Could not load vehicles.json. Run 'python main.py' first to generate it.");
+    });
+
+  // Legend showing what each marker colour means.
+  const legend = L.control({ position: "bottomright" });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create("div", "legend");
+    div.innerHTML = Object.entries(TYPE_COLORS)
+      .map(([type, color]) => `<span style="background:${color}"></span>${type}<br>`)
+      .join("");
+    return div;
+  };
+  legend.addTo(map);
+</script>
+
+</body>
+</html>
