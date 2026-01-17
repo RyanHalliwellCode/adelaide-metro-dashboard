@@ -10,25 +10,70 @@
 
 <style>
   html, body { height: 100%; margin: 0; font-family: sans-serif; }
-  #map { height: 100%; width: 100%; }
+
+  /* Header sits above the map; the map takes whatever height is left over. */
+  body { display: flex; flex-direction: column; }
+  header {
+    background: #1c2b3a;
+    color: white;
+    padding: 12px 20px;
+  }
+  header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  header p { margin: 4px 0 0; font-size: 13px; opacity: 0.75; }
+
+  #map { flex: 1; width: 100%; }
+
   .legend {
     background: white;
-    padding: 8px 12px;
+    padding: 10px 14px;
     line-height: 1.6;
     font-size: 14px;
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   }
-  .legend span {
+  .legend h2 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+  }
+  /* Each row is a clickable label so the colour swatch and count toggle too. */
+  .legend label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .legend .swatch {
     display: inline-block;
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    margin-right: 6px;
+    margin: 0 6px;
   }
+  .legend .count {
+    margin-left: auto;
+    padding-left: 12px;
+    color: #555;
+    font-variant-numeric: tabular-nums;
+  }
+  .legend .total {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    font-size: 13px;
+    color: #555;
+  }
+  .legend .total .count { font-weight: 600; }
 </style>
 </head>
 <body>
+
+<header>
+  <h1>Adelaide Metro - Live Vehicle Locations</h1>
+  <p>Vehicle positions from the Adelaide Metro GTFS-realtime feed. Use the panel to filter by type.</p>
+</header>
 
 <div id="map"></div>
 
@@ -37,6 +82,7 @@
   const ADELAIDE_CENTER = [-34.9285, 138.6007];
 
   // Colour used per vehicle type, matched to main.py's classify_vehicle().
+  // Order here also drives the order of rows in the filter panel.
   const TYPE_COLORS = {
     bus: "#1f77b4",
     train: "#d62728",
@@ -50,23 +96,41 @@
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map);
 
+  // One layer group per vehicle type. Filtering is then just adding or
+  // removing a whole group from the map, rather than touching each marker.
+  const layers = {};
+  for (const type of Object.keys(TYPE_COLORS)) {
+    layers[type] = L.layerGroup().addTo(map);
+  }
+
   // Static snapshot produced by main.py (python main.py writes vehicles.json).
   fetch("vehicles.json")
     .then((response) => response.json())
     .then((vehicles) => {
+      // Every type starts at 0 so a type with no vehicles still shows a row.
+      // Without this, an empty "unknown" would silently vanish from the panel
+      // and you could not tell zero apart from "not rendered".
+      const counts = Object.fromEntries(Object.keys(TYPE_COLORS).map((t) => [t, 0]));
+
       vehicles.forEach((v) => {
+        // Guard against a type main.py might emit that has no colour defined.
+        const type = TYPE_COLORS[v.type] ? v.type : "unknown";
+        counts[type] += 1;
+
+        const color = TYPE_COLORS[type];
         L.circleMarker([v.latitude, v.longitude], {
           radius: 6,
-          color: TYPE_COLORS[v.type] || TYPE_COLORS.unknown,
-          fillColor: TYPE_COLORS[v.type] || TYPE_COLORS.unknown,
+          color: color,
+          fillColor: color,
           fillOpacity: 0.8,
         })
-          .addTo(map)
           .bindPopup(
-            `<b>${v.type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
-          );
+            `<b>${type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
+          )
+          .addTo(layers[type]);
       });
 
+      addFilterPanel(counts, vehicles.length);
       document.title = `Adelaide Metro - ${vehicles.length} vehicles`;
     })
     .catch((err) => {
@@ -74,16 +138,47 @@
       alert("Could not load vehicles.json. Run 'python main.py' first to generate it.");
     });
 
-  // Legend showing what each marker colour means.
-  const legend = L.control({ position: "bottomright" });
-  legend.onAdd = function () {
-    const div = L.DomUtil.create("div", "legend");
-    div.innerHTML = Object.entries(TYPE_COLORS)
-      .map(([type, color]) => `<span style="background:${color}"></span>${type}<br>`)
-      .join("");
-    return div;
-  };
-  legend.addTo(map);
+  // Legend doubles as the filter: a checkbox per type, with its live count.
+  function addFilterPanel(counts, total) {
+    const panel = L.control({ position: "bottomright" });
+
+    panel.onAdd = function () {
+      const div = L.DomUtil.create("div", "legend");
+
+      div.innerHTML =
+        "<h2>Vehicle types</h2>" +
+        Object.entries(TYPE_COLORS)
+          .map(
+            ([type, color]) => `
+              <label>
+                <input type="checkbox" data-type="${type}" checked>
+                <span class="swatch" style="background:${color}"></span>
+                ${type}
+                <span class="count">${counts[type]}</span>
+              </label>`
+          )
+          .join("") +
+        `<div class="total">Total<span class="count">${total}</span></div>`;
+
+      // Without this, clicking a checkbox also pans/zooms the map underneath.
+      L.DomEvent.disableClickPropagation(div);
+
+      div.querySelectorAll("input[type=checkbox]").forEach((box) => {
+        box.addEventListener("change", () => {
+          const layer = layers[box.dataset.type];
+          if (box.checked) {
+            layer.addTo(map);
+          } else {
+            map.removeLayer(layer);
+          }
+        });
+      });
+
+      return div;
+    };
+
+    panel.addTo(map);
+  }
 </script>
 
 </body>
