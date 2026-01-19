@@ -1,2149 +1,2898 @@
 [
   {
-    "latitude": -34.97213,
-    "longitude": 138.59122,
-    "route_id": "G10",
-    "vehicle_id": "1003",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.878674,
-    "longitude": 138.5371,
-    "route_id": "100",
-    "vehicle_id": "1005",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.852753,
-    "longitude": 138.51024,
+    "latitude": -34.915703,
+    "longitude": 138.64062,
     "route_id": "300",
     "vehicle_id": "1006",
     "type": "bus"
   },
   {
-    "latitude": -35.012016,
-    "longitude": 138.5416,
-    "route_id": "300U",
+    "latitude": -34.92776,
+    "longitude": 138.59937,
+    "route_id": "G10",
     "vehicle_id": "1007",
     "type": "bus"
   },
   {
-    "latitude": -34.973057,
-    "longitude": 138.60909,
-    "route_id": "190",
+    "latitude": -34.872375,
+    "longitude": 138.54364,
+    "route_id": "230",
     "vehicle_id": "1008",
     "type": "bus"
   },
   {
-    "latitude": -34.92146,
-    "longitude": 138.60124,
+    "latitude": -34.987125,
+    "longitude": 138.5237,
+    "route_id": "300U",
+    "vehicle_id": "1012",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.921833,
+    "longitude": 138.5937,
     "route_id": "BTANIC",
     "vehicle_id": "102",
     "type": "tram"
   },
   {
-    "latitude": -34.83214,
-    "longitude": 138.62204,
-    "route_id": "229F",
+    "latitude": -34.9211,
+    "longitude": 138.63622,
+    "route_id": "H21",
+    "vehicle_id": "1022",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.849968,
+    "longitude": 138.60022,
+    "route_id": "481",
     "vehicle_id": "1023",
     "type": "bus"
   },
   {
-    "latitude": -34.96169,
-    "longitude": 138.64424,
+    "latitude": -34.920464,
+    "longitude": 138.54865,
     "route_id": "100",
     "vehicle_id": "1025",
     "type": "bus"
   },
   {
-    "latitude": -34.819332,
-    "longitude": 138.6114,
+    "latitude": -34.9226,
+    "longitude": 138.59958,
     "route_id": "222",
     "vehicle_id": "1026",
     "type": "bus"
   },
   {
-    "latitude": -34.903862,
-    "longitude": 138.54478,
-    "route_id": "117",
+    "latitude": -34.87565,
+    "longitude": 138.5584,
+    "route_id": "230",
     "vehicle_id": "1028",
     "type": "bus"
   },
   {
-    "latitude": -34.90784,
-    "longitude": 138.57594,
+    "latitude": -34.915367,
+    "longitude": 138.57812,
     "route_id": "BTANIC",
     "vehicle_id": "103",
     "type": "tram"
   },
   {
-    "latitude": -34.8782,
-    "longitude": 138.68513,
-    "route_id": "178S",
+    "latitude": -34.89199,
+    "longitude": 138.64084,
+    "route_id": "W90",
     "vehicle_id": "1030",
     "type": "bus"
   },
   {
-    "latitude": -34.814533,
-    "longitude": 138.7097,
-    "route_id": "543",
-    "vehicle_id": "1034",
+    "latitude": -34.82331,
+    "longitude": 138.64676,
+    "route_id": "229F",
+    "vehicle_id": "1031",
     "type": "bus"
   },
   {
-    "latitude": -34.87203,
-    "longitude": 138.6476,
-    "route_id": "281",
+    "latitude": -35.032078,
+    "longitude": 138.62549,
+    "route_id": "673",
+    "vehicle_id": "1036",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92181,
+    "longitude": 138.59572,
+    "route_id": "288",
     "vehicle_id": "1037",
     "type": "bus"
   },
   {
-    "latitude": -34.92229,
-    "longitude": 138.59955,
-    "route_id": "222",
-    "vehicle_id": "1043",
+    "latitude": -34.928944,
+    "longitude": 138.59944,
+    "route_id": "GLNELG",
+    "vehicle_id": "104",
+    "type": "tram"
+  },
+  {
+    "latitude": -34.909534,
+    "longitude": 138.59712,
+    "route_id": "G10",
+    "vehicle_id": "1040",
     "type": "bus"
   },
   {
-    "latitude": -34.924664,
-    "longitude": 138.54955,
+    "latitude": -34.88101,
+    "longitude": 138.68579,
     "route_id": "H30",
     "vehicle_id": "1044",
     "type": "bus"
   },
   {
-    "latitude": -34.873405,
-    "longitude": 138.55127,
-    "route_id": "253X",
-    "vehicle_id": "1045",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.85166,
-    "longitude": 138.52536,
-    "route_id": "254X",
+    "latitude": -34.87226,
+    "longitude": 138.55081,
+    "route_id": "100",
     "vehicle_id": "1046",
     "type": "bus"
   },
   {
-    "latitude": -34.90863,
-    "longitude": 138.57701,
-    "route_id": "117",
+    "latitude": -34.92728,
+    "longitude": 138.63612,
+    "route_id": "142",
     "vehicle_id": "1047",
     "type": "bus"
   },
   {
-    "latitude": -34.92818,
-    "longitude": 138.61055,
+    "latitude": -34.868446,
+    "longitude": 138.66164,
     "route_id": "174",
-    "vehicle_id": "1048",
+    "vehicle_id": "1051",
     "type": "bus"
   },
   {
-    "latitude": -34.86766,
-    "longitude": 138.66382,
-    "route_id": "H30",
-    "vehicle_id": "1049",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.97694,
-    "longitude": 138.59639,
-    "route_id": "190",
-    "vehicle_id": "1050",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.91928,
-    "longitude": 138.67464,
+    "latitude": -34.96376,
+    "longitude": 138.55481,
     "route_id": "H20",
     "vehicle_id": "1052",
     "type": "bus"
   },
   {
-    "latitude": -34.94734,
-    "longitude": 138.64294,
-    "route_id": "300",
-    "vehicle_id": "1053",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.893013,
-    "longitude": 138.60966,
-    "route_id": "203",
+    "latitude": -34.828297,
+    "longitude": 138.68428,
+    "route_id": "560",
     "vehicle_id": "1054",
     "type": "bus"
   },
   {
-    "latitude": -34.921776,
-    "longitude": 138.62416,
-    "route_id": "H22",
-    "vehicle_id": "1055",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.900482,
-    "longitude": 138.53995,
-    "route_id": "118",
-    "vehicle_id": "1056",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.79281,
-    "longitude": 138.64595,
-    "route_id": "228F",
+    "latitude": -34.71676,
+    "longitude": 138.66957,
+    "route_id": "441",
     "vehicle_id": "1057",
     "type": "bus"
   },
   {
-    "latitude": -34.68876,
-    "longitude": 138.69055,
-    "route_id": "228F",
+    "latitude": -34.74291,
+    "longitude": 138.61127,
+    "route_id": "400",
     "vehicle_id": "1058",
     "type": "bus"
   },
   {
-    "latitude": -34.92159,
-    "longitude": 138.5986,
+    "latitude": -34.962727,
+    "longitude": 138.56392,
     "route_id": "GLNELG",
     "vehicle_id": "106",
     "type": "tram"
   },
   {
-    "latitude": -34.921253,
-    "longitude": 138.60449,
-    "route_id": "281",
-    "vehicle_id": "1061",
+    "latitude": -34.92168,
+    "longitude": 138.61073,
+    "route_id": "W91",
+    "vehicle_id": "1060",
     "type": "bus"
   },
   {
-    "latitude": -34.83955,
-    "longitude": 138.49881,
-    "route_id": "150",
+    "latitude": -34.92516,
+    "longitude": 138.61186,
+    "route_id": "147",
     "vehicle_id": "1063",
     "type": "bus"
   },
   {
-    "latitude": -34.924248,
-    "longitude": 138.6014,
-    "route_id": "H33",
-    "vehicle_id": "1064",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.99097,
-    "longitude": 138.53412,
-    "route_id": "248",
+    "latitude": -34.97524,
+    "longitude": 138.53716,
+    "route_id": "265",
     "vehicle_id": "1065",
     "type": "bus"
   },
   {
-    "latitude": -34.818127,
-    "longitude": 138.66115,
+    "latitude": -34.908173,
+    "longitude": 138.60532,
     "route_id": "203",
     "vehicle_id": "1066",
     "type": "bus"
   },
   {
-    "latitude": -35.01483,
-    "longitude": 138.57253,
+    "latitude": -34.920208,
+    "longitude": 138.4945,
     "route_id": "300",
     "vehicle_id": "1068",
     "type": "bus"
   },
   {
-    "latitude": -34.89964,
-    "longitude": 138.49042,
+    "latitude": -34.906147,
+    "longitude": 138.64188,
     "route_id": "H30",
     "vehicle_id": "1070",
     "type": "bus"
   },
   {
-    "latitude": -34.971478,
-    "longitude": 138.56435,
-    "route_id": "241",
+    "latitude": -34.834694,
+    "longitude": 138.62654,
+    "route_id": "202F",
     "vehicle_id": "1074",
     "type": "bus"
   },
   {
-    "latitude": -34.99272,
-    "longitude": 138.57472,
-    "route_id": "972",
+    "latitude": -34.921135,
+    "longitude": 138.60667,
+    "route_id": "W90",
+    "vehicle_id": "1076",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.028183,
+    "longitude": 138.59106,
+    "route_id": "956",
     "vehicle_id": "1078",
     "type": "bus"
   },
   {
-    "latitude": -34.94187,
-    "longitude": 138.57632,
-    "route_id": "168",
-    "vehicle_id": "1079",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.93323,
-    "longitude": 138.60028,
+    "latitude": -34.941505,
+    "longitude": 138.60023,
     "route_id": "GLNELG",
     "vehicle_id": "108",
     "type": "tram"
   },
   {
-    "latitude": -34.989124,
-    "longitude": 138.58345,
-    "route_id": "W91C",
+    "latitude": -34.92821,
+    "longitude": 138.6007,
+    "route_id": "241",
     "vehicle_id": "1080",
     "type": "bus"
   },
   {
-    "latitude": -35.02583,
-    "longitude": 138.54156,
-    "route_id": "265",
+    "latitude": -35.04514,
+    "longitude": 138.62125,
+    "route_id": "601A",
     "vehicle_id": "1082",
     "type": "bus"
   },
   {
-    "latitude": -34.995445,
-    "longitude": 138.54642,
-    "route_id": "100P",
-    "vehicle_id": "1084",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.90865,
-    "longitude": 138.59676,
-    "route_id": "251",
+    "latitude": -35.011288,
+    "longitude": 138.52257,
+    "route_id": "265",
     "vehicle_id": "1085",
     "type": "bus"
   },
   {
-    "latitude": -34.926044,
-    "longitude": 138.59967,
-    "route_id": "202F",
+    "latitude": -34.92965,
+    "longitude": 138.55222,
+    "route_id": "100B",
+    "vehicle_id": "1086",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.846584,
+    "longitude": 138.6178,
+    "route_id": "202",
     "vehicle_id": "1089",
     "type": "bus"
   },
   {
-    "latitude": -34.95843,
-    "longitude": 138.57239,
+    "latitude": -34.925205,
+    "longitude": 138.59961,
     "route_id": "GLNELG",
     "vehicle_id": "109",
     "type": "tram"
   },
   {
-    "latitude": -34.841564,
-    "longitude": 138.72044,
-    "route_id": "557",
+    "latitude": -34.8047,
+    "longitude": 138.61295,
+    "route_id": "566",
     "vehicle_id": "1091",
     "type": "bus"
   },
   {
-    "latitude": -34.862648,
-    "longitude": 138.52931,
-    "route_id": "230",
-    "vehicle_id": "1092",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.880318,
-    "longitude": 138.4936,
-    "route_id": "288",
+    "latitude": -34.9136,
+    "longitude": 138.54808,
+    "route_id": "100",
     "vehicle_id": "1093",
     "type": "bus"
   },
   {
-    "latitude": -34.980297,
-    "longitude": 138.59195,
-    "route_id": "G10",
-    "vehicle_id": "1095",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.09418,
-    "longitude": 138.53487,
+    "latitude": -35.01645,
+    "longitude": 138.575,
     "route_id": "600",
     "vehicle_id": "1096",
     "type": "bus"
   },
   {
-    "latitude": -34.93488,
-    "longitude": 138.64519,
-    "route_id": "147",
+    "latitude": -34.879852,
+    "longitude": 138.50043,
+    "route_id": "157",
     "vehicle_id": "1097",
     "type": "bus"
   },
   {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "200",
+    "route_id": "251",
     "vehicle_id": "1098",
     "type": "bus"
   },
   {
-    "latitude": -34.9216,
-    "longitude": 138.59978,
-    "route_id": "172",
+    "latitude": -34.928688,
+    "longitude": 138.60027,
+    "route_id": "174",
     "vehicle_id": "1099",
     "type": "bus"
   },
   {
-    "latitude": -34.97782,
-    "longitude": 138.55576,
+    "latitude": -34.81689,
+    "longitude": 138.68753,
     "route_id": "M44",
     "vehicle_id": "1102",
     "type": "bus"
   },
   {
-    "latitude": -34.643707,
-    "longitude": 138.63673,
-    "route_id": "462",
+    "latitude": -35.052284,
+    "longitude": 138.59238,
+    "route_id": "G21",
+    "vehicle_id": "1105",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.79825,
+    "longitude": 138.70717,
+    "route_id": "J1",
+    "vehicle_id": "1109",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.71668,
+    "longitude": 138.6667,
+    "route_id": "452",
     "vehicle_id": "1110",
     "type": "bus"
   },
   {
-    "latitude": -34.741344,
-    "longitude": 138.67622,
+    "latitude": -34.92453,
+    "longitude": 138.59787,
     "route_id": "J1",
     "vehicle_id": "1111",
     "type": "bus"
   },
   {
-    "latitude": -34.935184,
-    "longitude": 138.53654,
+    "latitude": -34.932808,
+    "longitude": 138.53671,
     "route_id": "J1",
     "vehicle_id": "1113",
     "type": "bus"
   },
   {
-    "latitude": -34.821575,
-    "longitude": 138.69502,
+    "latitude": -34.721962,
+    "longitude": 138.6738,
+    "route_id": "J1",
+    "vehicle_id": "1114",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.933754,
+    "longitude": 138.53015,
     "route_id": "J1",
     "vehicle_id": "1115",
     "type": "bus"
   },
   {
-    "latitude": -34.86151,
-    "longitude": 138.66132,
-    "route_id": "502",
+    "latitude": -34.888794,
+    "longitude": 138.50426,
+    "route_id": "110",
     "vehicle_id": "1116",
     "type": "bus"
   },
   {
-    "latitude": -35.00842,
-    "longitude": 138.55579,
-    "route_id": "M44",
+    "latitude": -34.92463,
+    "longitude": 138.59372,
+    "route_id": "617",
+    "vehicle_id": "1117",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924183,
+    "longitude": 138.60262,
+    "route_id": "G40X",
     "vehicle_id": "1119",
     "type": "bus"
   },
   {
-    "latitude": -34.921864,
-    "longitude": 138.59935,
+    "latitude": -34.980427,
+    "longitude": 138.51213,
     "route_id": "GLNELG",
     "vehicle_id": "112",
     "type": "tram"
   },
   {
-    "latitude": -34.874096,
-    "longitude": 138.59163,
+    "latitude": -34.990128,
+    "longitude": 138.60692,
     "route_id": "300",
     "vehicle_id": "1121",
     "type": "bus"
   },
   {
-    "latitude": -34.902267,
-    "longitude": 138.54262,
-    "route_id": "100",
+    "latitude": -34.957024,
+    "longitude": 138.64369,
+    "route_id": "144",
     "vehicle_id": "1125",
     "type": "bus"
   },
   {
-    "latitude": -34.800537,
-    "longitude": 138.69171,
+    "latitude": -34.95848,
+    "longitude": 138.56346,
     "route_id": "M44",
     "vehicle_id": "1128",
     "type": "bus"
   },
   {
-    "latitude": -34.961533,
-    "longitude": 138.55876,
+    "latitude": -34.907932,
+    "longitude": 138.57607,
+    "route_id": "BTANIC",
+    "vehicle_id": "113",
+    "type": "tram"
+  },
+  {
+    "latitude": -34.93764,
+    "longitude": 138.58676,
     "route_id": "M44",
     "vehicle_id": "1130",
     "type": "bus"
   },
   {
-    "latitude": -34.875305,
-    "longitude": 138.6553,
+    "latitude": -34.92399,
+    "longitude": 138.60646,
     "route_id": "J2",
-    "vehicle_id": "1142",
+    "vehicle_id": "1135",
     "type": "bus"
   },
   {
-    "latitude": -34.822643,
-    "longitude": 138.61241,
+    "latitude": -34.792274,
+    "longitude": 138.6938,
+    "route_id": "541",
+    "vehicle_id": "1137",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92195,
+    "longitude": 138.59149,
+    "route_id": "GLNELG",
+    "vehicle_id": "114",
+    "type": "tram"
+  },
+  {
+    "latitude": -34.794544,
+    "longitude": 138.68994,
+    "route_id": "545X",
+    "vehicle_id": "1140",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.932262,
+    "longitude": 138.5467,
+    "route_id": "J2",
+    "vehicle_id": "1144",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.85496,
+    "longitude": 138.65263,
+    "route_id": "502",
+    "vehicle_id": "1145",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.90966,
+    "longitude": 138.59726,
     "route_id": "222",
     "vehicle_id": "1146",
     "type": "bus"
   },
   {
-    "latitude": -34.923603,
-    "longitude": 138.61201,
-    "route_id": "J1",
-    "vehicle_id": "1147",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.788174,
-    "longitude": 138.70155,
+    "latitude": -34.93277,
+    "longitude": 138.55316,
     "route_id": "J2",
     "vehicle_id": "1148",
     "type": "bus"
   },
   {
-    "latitude": -34.864025,
-    "longitude": 138.66136,
-    "route_id": "506",
+    "latitude": -34.793697,
+    "longitude": 138.6986,
+    "route_id": "M44",
+    "vehicle_id": "1149",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.84443,
+    "longitude": 138.67137,
+    "route_id": "507",
     "vehicle_id": "1152",
     "type": "bus"
   },
   {
-    "latitude": -34.83866,
-    "longitude": 138.68176,
+    "latitude": -35.010822,
+    "longitude": 138.5538,
     "route_id": "M44",
     "vehicle_id": "1154",
     "type": "bus"
   },
   {
-    "latitude": -34.976025,
-    "longitude": 138.51994,
+    "latitude": -34.975086,
+    "longitude": 138.60934,
     "route_id": "300",
     "vehicle_id": "1155",
     "type": "bus"
   },
   {
-    "latitude": -34.884804,
-    "longitude": 138.64258,
-    "route_id": "M44",
-    "vehicle_id": "1158",
+    "latitude": -34.83238,
+    "longitude": 138.64565,
+    "route_id": "501",
+    "vehicle_id": "1157",
     "type": "bus"
   },
   {
-    "latitude": -34.942253,
-    "longitude": 138.55315,
+    "latitude": -34.8586,
+    "longitude": 138.67274,
+    "route_id": "540",
+    "vehicle_id": "1162",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.82,
+    "longitude": 138.66115,
+    "route_id": "506",
+    "vehicle_id": "1163",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.834183,
+    "longitude": 138.67662,
+    "route_id": "503",
+    "vehicle_id": "1165",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.91011,
+    "longitude": 138.67584,
     "route_id": "H20",
     "vehicle_id": "1171",
     "type": "bus"
   },
   {
-    "latitude": -34.857883,
-    "longitude": 138.63512,
-    "route_id": "206",
+    "latitude": -34.91795,
+    "longitude": 138.56668,
+    "route_id": "286",
+    "vehicle_id": "1177",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.966682,
+    "longitude": 138.55489,
+    "route_id": "M44",
+    "vehicle_id": "1182",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.90138,
+    "longitude": 138.60973,
+    "route_id": "975",
+    "vehicle_id": "1186",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.971092,
+    "longitude": 138.6185,
+    "route_id": "172",
+    "vehicle_id": "1191",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.016956,
+    "longitude": 138.55891,
+    "route_id": "989",
+    "vehicle_id": "1193",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.96557,
+    "longitude": 138.5989,
+    "route_id": "200C",
     "vehicle_id": "1194",
     "type": "bus"
   },
   {
-    "latitude": -34.924934,
-    "longitude": 138.58784,
-    "route_id": "H20",
+    "latitude": -34.967937,
+    "longitude": 138.52257,
+    "route_id": "168",
     "vehicle_id": "1196",
     "type": "bus"
   },
   {
-    "latitude": -34.86806,
-    "longitude": 138.66396,
-    "route_id": "174",
+    "latitude": -34.9584,
+    "longitude": 138.6149,
+    "route_id": "172",
     "vehicle_id": "1197",
     "type": "bus"
   },
   {
-    "latitude": -34.919308,
-    "longitude": 138.67369,
-    "route_id": "H22",
+    "latitude": -34.92032,
+    "longitude": 138.54865,
+    "route_id": "H22L",
     "vehicle_id": "1200",
     "type": "bus"
   },
   {
-    "latitude": -34.716846,
-    "longitude": 138.66847,
-    "route_id": "442",
+    "latitude": -34.58997,
+    "longitude": 138.7406,
+    "route_id": "491",
     "vehicle_id": "1201",
     "type": "bus"
   },
   {
-    "latitude": -34.804836,
-    "longitude": 138.61462,
-    "route_id": "224",
-    "vehicle_id": "1204",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.68571,
-    "longitude": 138.68956,
+    "latitude": -34.705086,
+    "longitude": 138.6744,
     "route_id": "440",
     "vehicle_id": "1208",
     "type": "bus"
   },
   {
-    "latitude": -34.816593,
-    "longitude": 138.65556,
-    "route_id": "229",
+    "latitude": -34.954292,
+    "longitude": 138.56995,
+    "route_id": "263",
     "vehicle_id": "1209",
     "type": "bus"
   },
   {
-    "latitude": -34.833282,
-    "longitude": 138.69058,
-    "route_id": "507",
-    "vehicle_id": "1210",
+    "latitude": -34.76793,
+    "longitude": 138.65079,
+    "route_id": "560",
+    "vehicle_id": "413",
     "type": "bus"
   },
   {
-    "latitude": -34.7663,
-    "longitude": 138.69484,
-    "route_id": "415",
+    "latitude": -34.744183,
+    "longitude": 138.61186,
+    "route_id": "401",
     "vehicle_id": "1211",
     "type": "bus"
   },
   {
-    "latitude": -34.716938,
-    "longitude": 138.6654,
-    "route_id": "452",
+    "latitude": -34.764744,
+    "longitude": 138.60254,
+    "route_id": "411",
     "vehicle_id": "1212",
     "type": "bus"
   },
   {
-    "latitude": -34.746967,
-    "longitude": 138.61641,
-    "route_id": "403",
+    "latitude": -34.728867,
+    "longitude": 138.67532,
+    "route_id": "400",
     "vehicle_id": "1214",
     "type": "bus"
   },
   {
-    "latitude": -34.804626,
-    "longitude": 138.613,
-    "route_id": "411",
+    "latitude": -34.77451,
+    "longitude": 138.66165,
+    "route_id": "476",
     "vehicle_id": "1215",
     "type": "bus"
   },
   {
-    "latitude": -34.84035,
-    "longitude": 138.60579,
-    "route_id": "222",
+    "latitude": -34.751762,
+    "longitude": 138.65765,
+    "route_id": "224",
     "vehicle_id": "1216",
     "type": "bus"
   },
   {
-    "latitude": -34.75766,
-    "longitude": 138.59352,
-    "route_id": "411",
+    "latitude": -34.814064,
+    "longitude": 138.62177,
+    "route_id": "225",
+    "vehicle_id": "1217",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.803936,
+    "longitude": 138.61383,
+    "route_id": "224M",
+    "vehicle_id": "1219",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.80359,
+    "longitude": 138.61264,
+    "route_id": "224",
     "vehicle_id": "1220",
     "type": "bus"
   },
   {
-    "latitude": -34.681297,
-    "longitude": 138.68723,
-    "route_id": "451",
+    "latitude": -34.719112,
+    "longitude": 138.67517,
+    "route_id": "400",
     "vehicle_id": "1221",
     "type": "bus"
   },
   {
-    "latitude": -34.844563,
-    "longitude": 138.67697,
-    "route_id": "271",
-    "vehicle_id": "1222",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.755474,
-    "longitude": 138.65187,
-    "route_id": "560",
+    "latitude": -34.69096,
+    "longitude": 138.69574,
+    "route_id": "442",
     "vehicle_id": "1223",
     "type": "bus"
   },
   {
-    "latitude": -34.881783,
-    "longitude": 138.6025,
+    "latitude": -34.91537,
+    "longitude": 138.62856,
+    "route_id": "106",
+    "vehicle_id": "1225",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.861645,
+    "longitude": 138.60123,
     "route_id": "222",
     "vehicle_id": "1226",
     "type": "bus"
   },
   {
-    "latitude": -34.84368,
-    "longitude": 138.68892,
-    "route_id": "271",
+    "latitude": -34.861103,
+    "longitude": 138.65048,
+    "route_id": "273",
+    "vehicle_id": "1227",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.899532,
+    "longitude": 138.58835,
+    "route_id": "239",
     "vehicle_id": "1228",
     "type": "bus"
   },
   {
-    "latitude": -34.863716,
-    "longitude": 138.66252,
-    "route_id": "559",
-    "vehicle_id": "1230",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.84395,
-    "longitude": 138.71437,
-    "route_id": "557",
+    "latitude": -34.86079,
+    "longitude": 138.66046,
+    "route_id": "506",
     "vehicle_id": "1232",
     "type": "bus"
   },
   {
-    "latitude": -34.94609,
-    "longitude": 138.61317,
-    "route_id": "170",
+    "latitude": -34.92103,
+    "longitude": 138.60858,
+    "route_id": "174",
     "vehicle_id": "1233",
     "type": "bus"
   },
   {
-    "latitude": -34.81942,
-    "longitude": 138.6553,
-    "route_id": "506",
-    "vehicle_id": "1234",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.842445,
-    "longitude": 138.65494,
-    "route_id": "506",
+    "latitude": -34.89594,
+    "longitude": 138.64037,
+    "route_id": "178",
     "vehicle_id": "1235",
     "type": "bus"
   },
   {
-    "latitude": -34.923855,
-    "longitude": 138.60565,
+    "latitude": -34.87669,
+    "longitude": 138.67163,
+    "route_id": "X30",
+    "vehicle_id": "1236",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.89396,
+    "longitude": 138.49287,
     "route_id": "H30",
     "vehicle_id": "1238",
     "type": "bus"
   },
   {
-    "latitude": -34.93189,
-    "longitude": 138.6686,
-    "route_id": "141",
+    "latitude": -34.891754,
+    "longitude": 138.51364,
+    "route_id": "118",
     "vehicle_id": "1239",
     "type": "bus"
   },
   {
-    "latitude": -34.86396,
-    "longitude": 138.64677,
-    "route_id": "273",
+    "latitude": -34.857723,
+    "longitude": 138.5829,
+    "route_id": "235",
     "vehicle_id": "1240",
     "type": "bus"
   },
   {
-    "latitude": -34.920902,
-    "longitude": 138.59319,
-    "route_id": "235",
+    "latitude": -34.92001,
+    "longitude": 138.60725,
+    "route_id": "271",
     "vehicle_id": "1241",
     "type": "bus"
   },
   {
-    "latitude": -34.863037,
-    "longitude": 138.6193,
-    "route_id": "206",
-    "vehicle_id": "1242",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.862125,
-    "longitude": 138.6615,
-    "route_id": "501",
+    "latitude": -34.828903,
+    "longitude": 138.64034,
+    "route_id": "565",
     "vehicle_id": "1243",
     "type": "bus"
   },
   {
-    "latitude": -34.894833,
-    "longitude": 138.68599,
+    "latitude": -34.92641,
+    "longitude": 138.51884,
     "route_id": "H33",
     "vehicle_id": "1244",
     "type": "bus"
   },
   {
-    "latitude": -35.02142,
-    "longitude": 138.5676,
-    "route_id": "G20",
-    "vehicle_id": "1247",
+    "latitude": -35.005264,
+    "longitude": 138.58467,
+    "route_id": "W91",
+    "vehicle_id": "1245",
     "type": "bus"
   },
   {
-    "latitude": -34.915714,
-    "longitude": 138.59886,
+    "latitude": -34.814766,
+    "longitude": 138.62628,
     "route_id": "228F",
     "vehicle_id": "1248",
     "type": "bus"
   },
   {
-    "latitude": -34.697086,
-    "longitude": 138.71124,
-    "route_id": "442",
+    "latitude": -34.762764,
+    "longitude": 138.64108,
+    "route_id": "400",
     "vehicle_id": "1249",
     "type": "bus"
   },
   {
-    "latitude": -34.973473,
-    "longitude": 138.53757,
-    "route_id": "H20",
+    "latitude": -34.913513,
+    "longitude": 138.5769,
+    "route_id": "286",
+    "vehicle_id": "1250",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92775,
+    "longitude": 138.58803,
+    "route_id": "140",
+    "vehicle_id": "1254",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92462,
+    "longitude": 138.5939,
+    "route_id": "106",
     "vehicle_id": "1255",
     "type": "bus"
   },
   {
-    "latitude": -34.876007,
-    "longitude": 138.49179,
-    "route_id": "157",
+    "latitude": -34.899338,
+    "longitude": 138.67505,
+    "route_id": "H20",
+    "vehicle_id": "1256",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.906685,
+    "longitude": 138.60803,
+    "route_id": "208",
+    "vehicle_id": "1257",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92406,
+    "longitude": 138.5997,
+    "route_id": "172",
+    "vehicle_id": "1259",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.82075,
+    "longitude": 138.7042,
+    "route_id": "543",
+    "vehicle_id": "1260",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92117,
+    "longitude": 138.60701,
+    "route_id": "167",
+    "vehicle_id": "1261",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.84559,
+    "longitude": 138.5061,
+    "route_id": "333",
     "vehicle_id": "1262",
     "type": "bus"
   },
   {
-    "latitude": -34.831844,
-    "longitude": 138.69453,
-    "route_id": "541",
-    "vehicle_id": "1271",
+    "latitude": -34.924793,
+    "longitude": 138.58755,
+    "route_id": "H22",
+    "vehicle_id": "1263",
     "type": "bus"
   },
   {
-    "latitude": -35.017735,
-    "longitude": 138.5444,
+    "latitude": -34.86412,
+    "longitude": 138.54993,
+    "route_id": "994",
+    "vehicle_id": "1264",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92427,
+    "longitude": 138.50139,
+    "route_id": "668",
+    "vehicle_id": "1265",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.859104,
+    "longitude": 138.59212,
+    "route_id": "G10",
+    "vehicle_id": "1267",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.921528,
+    "longitude": 138.60204,
+    "route_id": "171",
+    "vehicle_id": "1268",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.914497,
+    "longitude": 138.61383,
     "route_id": "M44",
     "vehicle_id": "1272",
     "type": "bus"
   },
   {
-    "latitude": -34.990925,
-    "longitude": 138.53502,
-    "route_id": "248",
+    "latitude": -34.84895,
+    "longitude": 138.67807,
+    "route_id": "545X",
+    "vehicle_id": "1273",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.99567,
+    "longitude": 138.54153,
+    "route_id": "961",
+    "vehicle_id": "1274",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.863533,
+    "longitude": 138.66145,
+    "route_id": "506",
+    "vehicle_id": "1277",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9244,
+    "longitude": 138.59149,
+    "route_id": "542X",
+    "vehicle_id": "1278",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.88653,
+    "longitude": 138.6393,
+    "route_id": "541X",
+    "vehicle_id": "1279",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.89265,
+    "longitude": 138.60999,
+    "route_id": "203F",
     "vehicle_id": "1281",
     "type": "bus"
   },
   {
-    "latitude": -35.011658,
-    "longitude": 138.57614,
+    "latitude": -34.86889,
+    "longitude": 138.66159,
+    "route_id": "J2",
+    "vehicle_id": "1282",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.886314,
+    "longitude": 138.63971,
+    "route_id": "506",
+    "vehicle_id": "1283",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.810184,
+    "longitude": 138.68465,
+    "route_id": "929",
+    "vehicle_id": "1284",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.80582,
+    "longitude": 138.7008,
     "route_id": "G40X",
     "vehicle_id": "1286",
     "type": "bus"
   },
   {
-    "latitude": -34.92327,
-    "longitude": 138.59944,
-    "route_id": "178S",
+    "latitude": -34.893536,
+    "longitude": 138.64612,
+    "route_id": "174",
+    "vehicle_id": "1288",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.91563,
+    "longitude": 138.62439,
+    "route_id": "X30",
     "vehicle_id": "1307",
     "type": "bus"
   },
   {
-    "latitude": -34.912094,
-    "longitude": 138.67603,
-    "route_id": "106",
+    "latitude": -34.954254,
+    "longitude": 138.5452,
+    "route_id": "168",
     "vehicle_id": "1319",
     "type": "bus"
   },
   {
-    "latitude": -34.974125,
-    "longitude": 138.51881,
-    "route_id": "168",
+    "latitude": -34.76112,
+    "longitude": 138.64322,
+    "route_id": "411",
+    "vehicle_id": "1321",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.857487,
+    "longitude": 138.69046,
+    "route_id": "559",
+    "vehicle_id": "1323",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92405,
+    "longitude": 138.6063,
+    "route_id": "H20",
     "vehicle_id": "1373",
     "type": "bus"
   },
   {
-    "latitude": -34.981106,
-    "longitude": 138.5429,
-    "route_id": "190",
+    "latitude": -34.92091,
+    "longitude": 138.64076,
+    "route_id": "H22",
+    "vehicle_id": "1377",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.918762,
+    "longitude": 138.5487,
+    "route_id": "286",
+    "vehicle_id": "1379",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.90429,
+    "longitude": 138.56383,
+    "route_id": "117",
+    "vehicle_id": "1383",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92199,
+    "longitude": 138.58708,
+    "route_id": "157",
+    "vehicle_id": "1386",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.862633,
+    "longitude": 138.5566,
+    "route_id": "252",
+    "vehicle_id": "1387",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.903034,
+    "longitude": 138.58997,
+    "route_id": "232",
     "vehicle_id": "1388",
     "type": "bus"
   },
   {
-    "latitude": -34.9056,
-    "longitude": 138.53093,
+    "latitude": -34.91864,
+    "longitude": 138.5777,
     "route_id": "110",
-    "vehicle_id": "1405",
+    "vehicle_id": "1404",
     "type": "bus"
   },
   {
-    "latitude": -34.786083,
-    "longitude": 138.66765,
-    "route_id": "502",
+    "latitude": -34.905212,
+    "longitude": 138.53848,
+    "route_id": "110",
     "vehicle_id": "1408",
     "type": "bus"
   },
   {
-    "latitude": -34.774624,
-    "longitude": 138.66177,
-    "route_id": "502",
+    "latitude": -34.87888,
+    "longitude": 138.49213,
+    "route_id": "110",
+    "vehicle_id": "1409",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.920193,
+    "longitude": 138.56921,
+    "route_id": "110",
     "vehicle_id": "1410",
     "type": "bus"
   },
   {
-    "latitude": -34.904243,
-    "longitude": 138.56291,
+    "latitude": -34.90504,
+    "longitude": 138.5402,
     "route_id": "110",
-    "vehicle_id": "1411",
+    "vehicle_id": "1413",
     "type": "bus"
   },
   {
-    "latitude": -34.9089,
-    "longitude": 138.6126,
+    "latitude": -34.76953,
+    "longitude": 138.65338,
     "route_id": "502",
     "vehicle_id": "1414",
     "type": "bus"
   },
   {
-    "latitude": -34.878498,
-    "longitude": 138.49353,
-    "route_id": "110",
+    "latitude": -34.81605,
+    "longitude": 138.67383,
+    "route_id": "506",
+    "vehicle_id": "1415",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924072,
+    "longitude": 138.60481,
+    "route_id": "502",
     "vehicle_id": "1416",
     "type": "bus"
   },
   {
-    "latitude": -34.9188,
-    "longitude": 138.57399,
-    "route_id": "110",
+    "latitude": -34.804058,
+    "longitude": 138.65161,
+    "route_id": "502",
     "vehicle_id": "1418",
     "type": "bus"
   },
   {
-    "latitude": -34.937115,
-    "longitude": 138.53758,
+    "latitude": -34.92409,
+    "longitude": 138.60669,
+    "route_id": "502",
+    "vehicle_id": "1419",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.81416,
+    "longitude": 138.69379,
     "route_id": "J1",
     "vehicle_id": "1421",
     "type": "bus"
   },
   {
-    "latitude": -34.716816,
-    "longitude": 138.66785,
+    "latitude": -34.923447,
+    "longitude": 138.57504,
+    "route_id": "J1",
+    "vehicle_id": "1424",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.821598,
+    "longitude": 138.63828,
     "route_id": "560",
     "vehicle_id": "1425",
     "type": "bus"
   },
   {
-    "latitude": -34.924843,
-    "longitude": 138.58868,
+    "latitude": -34.73608,
+    "longitude": 138.67569,
     "route_id": "J1",
     "vehicle_id": "1426",
     "type": "bus"
   },
   {
-    "latitude": -34.93691,
-    "longitude": 138.55275,
-    "route_id": "100",
-    "vehicle_id": "1428",
+    "latitude": -34.76333,
+    "longitude": 138.64272,
+    "route_id": "224M",
+    "vehicle_id": "1427",
     "type": "bus"
   },
   {
-    "latitude": -34.761883,
-    "longitude": 138.64813,
-    "route_id": "411",
-    "vehicle_id": "1429",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.762478,
-    "longitude": 138.64539,
-    "route_id": "502",
+    "latitude": -34.68475,
+    "longitude": 138.68909,
+    "route_id": "228F",
     "vehicle_id": "1431",
     "type": "bus"
   },
   {
-    "latitude": -34.71687,
-    "longitude": 138.66876,
-    "route_id": "J1",
-    "vehicle_id": "1432",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.804207,
-    "longitude": 138.68854,
-    "route_id": "M44",
+    "latitude": -34.855164,
+    "longitude": 138.65291,
+    "route_id": "501",
     "vehicle_id": "1435",
     "type": "bus"
   },
   {
-    "latitude": -35.022995,
-    "longitude": 138.61916,
-    "route_id": "195F",
+    "latitude": -34.829994,
+    "longitude": 138.64175,
+    "route_id": "203",
+    "vehicle_id": "1436",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.93104,
+    "longitude": 138.60616,
+    "route_id": "196F",
     "vehicle_id": "1439",
     "type": "bus"
   },
   {
-    "latitude": -34.92425,
-    "longitude": 138.60341,
-    "route_id": "110",
-    "vehicle_id": "1441",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.924927,
-    "longitude": 138.58789,
-    "route_id": "M44",
-    "vehicle_id": "1445",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.6961,
-    "longitude": 138.6696,
-    "route_id": "452",
-    "vehicle_id": "1446",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.962162,
-    "longitude": 138.5575,
-    "route_id": "M44",
-    "vehicle_id": "1447",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.78666,
-    "longitude": 138.7164,
-    "route_id": "541G",
-    "vehicle_id": "1448",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.804634,
-    "longitude": 138.65111,
-    "route_id": "502",
-    "vehicle_id": "1450",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.797287,
-    "longitude": 138.68161,
-    "route_id": "545",
-    "vehicle_id": "1465",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.83327,
-    "longitude": 138.69078,
-    "route_id": "M44",
-    "vehicle_id": "1468",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.894974,
-    "longitude": 138.62088,
+    "latitude": -34.85958,
+    "longitude": 138.6712,
     "route_id": "541",
     "vehicle_id": "1471",
     "type": "bus"
   },
   {
-    "latitude": -34.92077,
-    "longitude": 138.58392,
+    "latitude": -34.792065,
+    "longitude": 138.69426,
+    "route_id": "J2",
+    "vehicle_id": "1444",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.746502,
+    "longitude": 138.67667,
+    "route_id": "228F",
+    "vehicle_id": "1446",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.796387,
+    "longitude": 138.69537,
+    "route_id": "M44",
+    "vehicle_id": "1447",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.827744,
+    "longitude": 138.70567,
+    "route_id": "281",
+    "vehicle_id": "1449",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.827667,
+    "longitude": 138.69485,
+    "route_id": "542X",
+    "vehicle_id": "1452",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.915886,
+    "longitude": 138.59889,
+    "route_id": "254X",
+    "vehicle_id": "1462",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.762314,
+    "longitude": 138.64252,
+    "route_id": "225",
+    "vehicle_id": "1463",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.927612,
+    "longitude": 138.58784,
+    "route_id": "M44",
+    "vehicle_id": "1465",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.678604,
+    "longitude": 138.6821,
+    "route_id": "462C",
+    "vehicle_id": "1467",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.98955,
+    "longitude": 138.55676,
+    "route_id": "M44",
+    "vehicle_id": "1468",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.777195,
+    "longitude": 138.66577,
     "route_id": "502",
     "vehicle_id": "1478",
     "type": "bus"
   },
   {
-    "latitude": -34.811996,
-    "longitude": 138.69524,
-    "route_id": "J1",
+    "latitude": -34.833847,
+    "longitude": 138.68323,
+    "route_id": "506",
+    "vehicle_id": "1481",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.666798,
+    "longitude": 138.68338,
+    "route_id": "461",
     "vehicle_id": "1483",
     "type": "bus"
   },
   {
-    "latitude": -34.771027,
-    "longitude": 138.70737,
-    "route_id": "548",
-    "vehicle_id": "1484",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.924007,
-    "longitude": 138.60706,
-    "route_id": "M44",
+    "latitude": -34.80245,
+    "longitude": 138.68135,
+    "route_id": "545",
     "vehicle_id": "1485",
     "type": "bus"
   },
   {
-    "latitude": -34.932327,
-    "longitude": 138.54819,
-    "route_id": "J2",
+    "latitude": -34.923553,
+    "longitude": 138.59949,
+    "route_id": "209F",
     "vehicle_id": "1486",
     "type": "bus"
   },
   {
-    "latitude": -34.848854,
-    "longitude": 138.5036,
-    "route_id": "117",
+    "latitude": -34.859974,
+    "longitude": 138.68521,
+    "route_id": "557",
+    "vehicle_id": "1487",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92232,
+    "longitude": 138.612,
+    "route_id": "142",
     "vehicle_id": "1501",
     "type": "bus"
   },
   {
-    "latitude": -34.89624,
-    "longitude": 138.55803,
-    "route_id": "150",
+    "latitude": -34.924255,
+    "longitude": 138.5985,
+    "route_id": "141",
+    "vehicle_id": "1502",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.840893,
+    "longitude": 138.49258,
+    "route_id": "333",
     "vehicle_id": "1503",
     "type": "bus"
   },
   {
-    "latitude": -34.891907,
-    "longitude": 138.49184,
-    "route_id": "288",
+    "latitude": -34.930058,
+    "longitude": 138.59962,
+    "route_id": "610",
+    "vehicle_id": "1504",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.911484,
+    "longitude": 138.5991,
+    "route_id": "190B",
+    "vehicle_id": "1505",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.885944,
+    "longitude": 138.57596,
+    "route_id": "232",
+    "vehicle_id": "1509",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.904873,
+    "longitude": 138.61096,
+    "route_id": "281",
     "vehicle_id": "1510",
     "type": "bus"
   },
   {
-    "latitude": -34.90079,
-    "longitude": 138.62566,
-    "route_id": "W90",
+    "latitude": -34.84947,
+    "longitude": 138.50319,
+    "route_id": "117",
+    "vehicle_id": "1511",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.886562,
+    "longitude": 138.5672,
+    "route_id": "253X",
+    "vehicle_id": "1514",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.842777,
+    "longitude": 138.70967,
+    "route_id": "557",
     "vehicle_id": "1521",
     "type": "bus"
   },
   {
-    "latitude": -34.813,
-    "longitude": 138.66922,
-    "route_id": "506",
+    "latitude": -34.833355,
+    "longitude": 138.69142,
+    "route_id": "271",
     "vehicle_id": "1522",
     "type": "bus"
   },
   {
-    "latitude": -34.91364,
-    "longitude": 138.62444,
-    "route_id": "174",
+    "latitude": -34.954952,
+    "longitude": 138.61464,
+    "route_id": "170",
     "vehicle_id": "1523",
     "type": "bus"
   },
   {
-    "latitude": -34.906162,
-    "longitude": 138.59586,
-    "route_id": "229F",
-    "vehicle_id": "1525",
+    "latitude": -34.928326,
+    "longitude": 138.60071,
+    "route_id": "248",
+    "vehicle_id": "1524",
     "type": "bus"
   },
   {
-    "latitude": -34.896465,
-    "longitude": 138.58543,
-    "route_id": "235",
+    "latitude": -34.881325,
+    "longitude": 138.62375,
+    "route_id": "273",
     "vehicle_id": "1528",
     "type": "bus"
   },
   {
-    "latitude": -34.933266,
-    "longitude": 138.59341,
-    "route_id": "G10",
+    "latitude": -34.862164,
+    "longitude": 138.59238,
+    "route_id": "G10C",
     "vehicle_id": "1530",
     "type": "bus"
   },
   {
-    "latitude": -34.924057,
-    "longitude": 138.60504,
-    "route_id": "141",
+    "latitude": -34.924366,
+    "longitude": 138.601,
+    "route_id": "118",
     "vehicle_id": "1531",
     "type": "bus"
   },
   {
+    "latitude": -34.852333,
+    "longitude": 138.51021,
+    "route_id": "361",
+    "vehicle_id": "1532",
+    "type": "bus"
+  },
+  {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "542",
+    "route_id": "541X",
+    "vehicle_id": "1550",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.798973,
+    "longitude": 138.65717,
+    "route_id": "229",
+    "vehicle_id": "1551",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9193,
+    "longitude": 138.6151,
+    "route_id": "M44",
+    "vehicle_id": "1556",
+    "type": "bus"
+  },
+  {
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "route_id": "541",
     "vehicle_id": "1562",
     "type": "bus"
   },
   {
-    "latitude": -34.828228,
-    "longitude": 138.7193,
-    "route_id": "541",
+    "latitude": -34.868908,
+    "longitude": 138.66158,
+    "route_id": "540",
     "vehicle_id": "1563",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.86864,
+    "longitude": 138.66129,
+    "route_id": "503",
+    "vehicle_id": "1564",
     "type": "bus"
   },
   {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "251",
+    "route_id": "263",
     "vehicle_id": "1565",
     "type": "bus"
   },
   {
-    "latitude": -34.893867,
-    "longitude": 138.57907,
-    "route_id": "232",
-    "vehicle_id": "1569",
+    "latitude": -34.80548,
+    "longitude": 138.6505,
+    "route_id": "502",
+    "vehicle_id": "1566",
     "type": "bus"
   },
   {
-    "latitude": -34.748165,
-    "longitude": 138.66653,
-    "route_id": "224M",
+    "latitude": -34.839073,
+    "longitude": 138.50224,
+    "route_id": "150",
+    "vehicle_id": "1567",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92427,
+    "longitude": 138.50139,
+    "route_id": "667",
+    "vehicle_id": "1568",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.770905,
+    "longitude": 138.61063,
+    "route_id": "411",
     "vehicle_id": "1570",
     "type": "bus"
   },
   {
-    "latitude": -34.7511,
-    "longitude": 138.65794,
-    "route_id": "224",
+    "latitude": -34.76164,
+    "longitude": 138.61899,
+    "route_id": "411",
     "vehicle_id": "1571",
     "type": "bus"
   },
   {
-    "latitude": -34.734684,
-    "longitude": 138.67064,
-    "route_id": "400",
-    "vehicle_id": "1572",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.872265,
-    "longitude": 138.55101,
-    "route_id": "254X",
+    "latitude": -34.85432,
+    "longitude": 138.60052,
+    "route_id": "224F",
     "vehicle_id": "1573",
     "type": "bus"
   },
   {
-    "latitude": -34.80946,
-    "longitude": 138.61696,
-    "route_id": "566",
+    "latitude": -34.808075,
+    "longitude": 138.7279,
+    "route_id": "920",
     "vehicle_id": "1574",
     "type": "bus"
   },
   {
-    "latitude": -34.669594,
-    "longitude": 138.67389,
-    "route_id": "461",
+    "latitude": -34.917366,
+    "longitude": 138.59898,
+    "route_id": "206",
+    "vehicle_id": "1575",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92448,
+    "longitude": 138.59862,
+    "route_id": "X30",
+    "vehicle_id": "1766",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.868526,
+    "longitude": 138.6628,
+    "route_id": "X30",
+    "vehicle_id": "1774",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.918552,
+    "longitude": 138.61716,
+    "route_id": "163",
+    "vehicle_id": "1779",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.921417,
+    "longitude": 138.60135,
+    "route_id": "178",
+    "vehicle_id": "1781",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.923878,
+    "longitude": 138.60965,
+    "route_id": "H21",
+    "vehicle_id": "1785",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.66976,
+    "longitude": 138.69609,
+    "route_id": "440",
     "vehicle_id": "1801",
     "type": "bus"
   },
   {
-    "latitude": -34.916397,
-    "longitude": 138.5782,
-    "route_id": "288",
+    "latitude": -34.91533,
+    "longitude": 138.49316,
+    "route_id": "H30S",
     "vehicle_id": "1803",
     "type": "bus"
   },
   {
-    "latitude": -34.919735,
-    "longitude": 138.59947,
+    "latitude": -35.017376,
+    "longitude": 138.61642,
     "route_id": "196F",
     "vehicle_id": "1804",
     "type": "bus"
   },
   {
-    "latitude": -34.921715,
-    "longitude": 138.60547,
-    "route_id": "106",
-    "vehicle_id": "1805",
+    "latitude": -34.903225,
+    "longitude": 138.61095,
+    "route_id": "271",
+    "vehicle_id": "1806",
     "type": "bus"
   },
   {
-    "latitude": -34.912823,
-    "longitude": 138.51123,
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "route_id": "235",
+    "vehicle_id": "1809",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.919933,
+    "longitude": 138.61436,
+    "route_id": "H33",
+    "vehicle_id": "1810",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.896687,
+    "longitude": 138.67358,
     "route_id": "H33",
     "vehicle_id": "1813",
     "type": "bus"
   },
   {
-    "latitude": -34.884205,
-    "longitude": 138.61476,
-    "route_id": "206",
+    "latitude": -35.02191,
+    "longitude": 138.565,
+    "route_id": "200",
     "vehicle_id": "1814",
     "type": "bus"
   },
   {
-    "latitude": -34.94209,
-    "longitude": 138.57018,
-    "route_id": "167",
-    "vehicle_id": "1816",
+    "latitude": -34.924557,
+    "longitude": 138.59973,
+    "route_id": "265",
+    "vehicle_id": "1815",
     "type": "bus"
   },
   {
-    "latitude": -34.9325,
-    "longitude": 138.55585,
+    "latitude": -34.77128,
+    "longitude": 138.70683,
+    "route_id": "591C",
+    "vehicle_id": "1817",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.867477,
+    "longitude": 138.63055,
+    "route_id": "208",
+    "vehicle_id": "1818",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.791668,
+    "longitude": 138.69464,
     "route_id": "J2",
     "vehicle_id": "1819",
     "type": "bus"
   },
   {
-    "latitude": -34.86926,
-    "longitude": 138.66109,
-    "route_id": "J2",
-    "vehicle_id": "1823",
+    "latitude": -34.899776,
+    "longitude": 138.61858,
+    "route_id": "556",
+    "vehicle_id": "1822",
     "type": "bus"
   },
   {
-    "latitude": -34.94903,
-    "longitude": 138.62527,
-    "route_id": "171",
+    "latitude": -34.876495,
+    "longitude": 138.7002,
+    "route_id": "178",
     "vehicle_id": "1824",
     "type": "bus"
   },
   {
-    "latitude": -34.88523,
-    "longitude": 138.50414,
-    "route_id": "110",
+    "latitude": -34.85613,
+    "longitude": 138.65395,
+    "route_id": "502",
     "vehicle_id": "1825",
     "type": "bus"
   },
   {
-    "latitude": -34.87771,
-    "longitude": 138.55054,
-    "route_id": "J8",
+    "latitude": -34.925148,
+    "longitude": 138.50516,
+    "route_id": "H30",
     "vehicle_id": "1828",
     "type": "bus"
   },
   {
-    "latitude": -34.883766,
-    "longitude": 138.6314,
-    "route_id": "281",
+    "latitude": -34.89825,
+    "longitude": 138.5141,
+    "route_id": "288",
     "vehicle_id": "1829",
     "type": "bus"
   },
   {
-    "latitude": -34.879623,
-    "longitude": 138.50687,
-    "route_id": "157",
+    "latitude": -34.882427,
+    "longitude": 138.51306,
+    "route_id": "118",
+    "vehicle_id": "1907",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.849266,
+    "longitude": 138.59145,
+    "route_id": "G10B",
+    "vehicle_id": "1908",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92109,
+    "longitude": 138.63614,
+    "route_id": "140",
     "vehicle_id": "1909",
     "type": "bus"
   },
   {
-    "latitude": -34.865776,
-    "longitude": 138.67924,
-    "route_id": "556",
-    "vehicle_id": "1914",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.913506,
-    "longitude": 138.53407,
-    "route_id": "286",
+    "latitude": -34.879425,
+    "longitude": 138.63533,
+    "route_id": "281",
     "vehicle_id": "1915",
     "type": "bus"
   },
   {
-    "latitude": -34.915043,
-    "longitude": 138.63495,
-    "route_id": "H30",
-    "vehicle_id": "1917",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.94106,
-    "longitude": 138.58401,
-    "route_id": "263",
+    "latitude": -35.024044,
+    "longitude": 138.56941,
+    "route_id": "300J",
     "vehicle_id": "1919",
     "type": "bus"
   },
   {
-    "latitude": -34.966095,
-    "longitude": 138.59955,
-    "route_id": "200B",
-    "vehicle_id": "1920",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.876747,
-    "longitude": 138.63402,
-    "route_id": "300",
+    "latitude": -34.873882,
+    "longitude": 138.58414,
+    "route_id": "239",
     "vehicle_id": "1921",
     "type": "bus"
   },
   {
-    "latitude": -34.988888,
-    "longitude": 138.59937,
-    "route_id": "200C",
+    "latitude": -34.87742,
+    "longitude": 138.68524,
+    "route_id": "560A",
+    "vehicle_id": "1922",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.875988,
+    "longitude": 138.68059,
+    "route_id": "178",
+    "vehicle_id": "1923",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.872997,
+    "longitude": 138.61417,
+    "route_id": "206",
     "vehicle_id": "1924",
     "type": "bus"
   },
   {
-    "latitude": -34.88834,
-    "longitude": 138.61456,
-    "route_id": "208",
-    "vehicle_id": "1928",
+    "latitude": -34.940247,
+    "longitude": 138.60675,
+    "route_id": "195F",
+    "vehicle_id": "1926",
     "type": "bus"
   },
   {
-    "latitude": -34.85211,
-    "longitude": 138.50957,
-    "route_id": "232",
+    "latitude": -34.88384,
+    "longitude": 138.53265,
+    "route_id": "300",
+    "vehicle_id": "1929",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.942497,
+    "longitude": 138.56396,
+    "route_id": "167C",
+    "vehicle_id": "1934",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.950035,
+    "longitude": 138.60747,
+    "route_id": "190",
     "vehicle_id": "1935",
     "type": "bus"
   },
   {
-    "latitude": 0.0,
-    "longitude": 0.0,
-    "route_id": "241",
+    "latitude": -35.01757,
+    "longitude": 138.5492,
+    "route_id": "200B",
     "vehicle_id": "1937",
     "type": "bus"
   },
   {
-    "latitude": -34.956703,
-    "longitude": 138.60793,
-    "route_id": "190",
+    "latitude": -34.854485,
+    "longitude": 138.52158,
+    "route_id": "232",
     "vehicle_id": "1938",
     "type": "bus"
   },
   {
-    "latitude": -34.92472,
-    "longitude": 138.59158,
-    "route_id": "H22",
+    "latitude": -34.92174,
+    "longitude": 138.62483,
+    "route_id": "H22L",
     "vehicle_id": "1940",
     "type": "bus"
   },
   {
-    "latitude": -34.881996,
-    "longitude": 138.49371,
-    "route_id": "288",
+    "latitude": -34.9344,
+    "longitude": 138.51752,
+    "route_id": "163",
     "vehicle_id": "1941",
     "type": "bus"
   },
   {
-    "latitude": -34.924095,
-    "longitude": 138.62057,
-    "route_id": "H20",
+    "latitude": -34.90034,
+    "longitude": 138.68686,
+    "route_id": "X30",
     "vehicle_id": "1943",
     "type": "bus"
   },
   {
-    "latitude": -34.9064,
-    "longitude": 138.51534,
+    "latitude": -35.015877,
+    "longitude": 138.54742,
     "route_id": "300",
     "vehicle_id": "1944",
     "type": "bus"
   },
   {
-    "latitude": -34.953255,
-    "longitude": 138.57126,
-    "route_id": "265",
+    "latitude": -34.851166,
+    "longitude": 138.53787,
+    "route_id": "252",
     "vehicle_id": "1945",
     "type": "bus"
   },
   {
-    "latitude": -34.92294,
-    "longitude": 138.59944,
-    "route_id": "251",
-    "vehicle_id": "1947",
+    "latitude": -34.878124,
+    "longitude": 138.4935,
+    "route_id": "157",
+    "vehicle_id": "1946",
     "type": "bus"
   },
   {
-    "latitude": -34.93749,
-    "longitude": 138.49985,
-    "route_id": "300",
+    "latitude": -34.908092,
+    "longitude": 138.59671,
+    "route_id": "G10B",
+    "vehicle_id": "1949",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.866047,
+    "longitude": 138.5334,
+    "route_id": "232",
+    "vehicle_id": "1951",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.872726,
+    "longitude": 138.61818,
+    "route_id": "300H",
     "vehicle_id": "1952",
     "type": "bus"
   },
   {
-    "latitude": -34.923393,
-    "longitude": 138.6166,
+    "latitude": -34.85985,
+    "longitude": 138.49142,
     "route_id": "117",
     "vehicle_id": "1953",
     "type": "bus"
   },
   {
-    "latitude": -34.86153,
-    "longitude": 138.50592,
-    "route_id": "118",
+    "latitude": -34.924458,
+    "longitude": 138.59973,
+    "route_id": "254X",
     "vehicle_id": "1955",
     "type": "bus"
   },
   {
-    "latitude": -34.926476,
-    "longitude": 138.5163,
-    "route_id": "H30",
+    "latitude": -34.917614,
+    "longitude": 138.56747,
+    "route_id": "288",
     "vehicle_id": "1958",
     "type": "bus"
   },
   {
-    "latitude": -34.93312,
-    "longitude": 138.64197,
+    "latitude": -34.98506,
+    "longitude": 138.52063,
     "route_id": "300",
     "vehicle_id": "1960",
     "type": "bus"
   },
   {
-    "latitude": -34.931583,
-    "longitude": 138.64178,
-    "route_id": "144",
+    "latitude": -34.87584,
+    "longitude": 138.55441,
+    "route_id": "251",
+    "vehicle_id": "1961",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.979443,
+    "longitude": 138.6104,
+    "route_id": "196F",
     "vehicle_id": "1962",
     "type": "bus"
   },
   {
-    "latitude": -34.908806,
-    "longitude": 138.59679,
-    "route_id": "G10",
-    "vehicle_id": "1967",
+    "latitude": -34.93708,
+    "longitude": 138.64218,
+    "route_id": "300",
+    "vehicle_id": "1964",
     "type": "bus"
   },
   {
-    "latitude": -34.90429,
-    "longitude": 138.59537,
-    "route_id": "G10",
+    "latitude": -34.924667,
+    "longitude": 138.59975,
+    "route_id": "222",
+    "vehicle_id": "1966",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.02144,
+    "longitude": 138.56761,
+    "route_id": "300G",
     "vehicle_id": "1968",
     "type": "bus"
   },
   {
-    "latitude": -34.905678,
-    "longitude": 138.59087,
+    "latitude": -34.915024,
+    "longitude": 138.59312,
     "route_id": "98C",
     "vehicle_id": "1969",
     "type": "bus"
   },
   {
-    "latitude": -34.92592,
-    "longitude": 138.59966,
+    "latitude": -34.928627,
+    "longitude": 138.59859,
     "route_id": "99C",
     "vehicle_id": "1970",
     "type": "bus"
   },
   {
+    "latitude": -34.810165,
+    "longitude": 138.61517,
+    "route_id": "222",
+    "vehicle_id": "1971",
+    "type": "bus"
+  },
+  {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "411",
+    "route_id": "222",
     "vehicle_id": "1973",
     "type": "bus"
   },
   {
-    "latitude": -34.932377,
-    "longitude": 138.61076,
+    "latitude": -34.889683,
+    "longitude": 138.65576,
+    "route_id": "178S",
+    "vehicle_id": "1974",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92484,
+    "longitude": 138.58885,
+    "route_id": "H33",
+    "vehicle_id": "1975",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9267,
+    "longitude": 138.61201,
     "route_id": "98C",
     "vehicle_id": "1977",
     "type": "bus"
   },
   {
-    "latitude": -34.888035,
-    "longitude": 138.5696,
-    "route_id": "230",
-    "vehicle_id": "1983",
+    "latitude": -34.94734,
+    "longitude": 138.51996,
+    "route_id": "300",
+    "vehicle_id": "1979",
     "type": "bus"
   },
   {
-    "latitude": -34.92677,
-    "longitude": 138.53421,
-    "route_id": "H22",
-    "vehicle_id": "1985",
+    "latitude": -34.89055,
+    "longitude": 138.57365,
+    "route_id": "253X",
+    "vehicle_id": "1980",
     "type": "bus"
   },
   {
-    "latitude": -34.937725,
-    "longitude": 138.6128,
-    "route_id": "150",
-    "vehicle_id": "1986",
+    "latitude": -34.924793,
+    "longitude": 138.5492,
+    "route_id": "H32",
+    "vehicle_id": "1984",
     "type": "bus"
   },
   {
-    "latitude": -34.924984,
-    "longitude": 138.58804,
-    "route_id": "118",
-    "vehicle_id": "1987",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.91552,
-    "longitude": 138.62285,
-    "route_id": "178",
+    "latitude": -34.952892,
+    "longitude": 138.6076,
+    "route_id": "190",
     "vehicle_id": "1988",
     "type": "bus"
   },
   {
-    "latitude": -35.01087,
-    "longitude": 138.58138,
+    "latitude": -34.851093,
+    "longitude": 138.53778,
+    "route_id": "254X",
+    "vehicle_id": "1990",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.948536,
+    "longitude": 138.57162,
+    "route_id": "997",
+    "vehicle_id": "1991",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.861794,
+    "longitude": 138.5923,
     "route_id": "G10",
     "vehicle_id": "1995",
     "type": "bus"
   },
   {
-    "latitude": -34.922092,
-    "longitude": 138.58722,
+    "latitude": -34.935196,
+    "longitude": 138.6125,
+    "route_id": "178M",
+    "vehicle_id": "1996",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.921665,
+    "longitude": 138.59712,
     "route_id": "BTANIC",
     "vehicle_id": "201",
     "type": "tram"
   },
   {
-    "latitude": -34.921516,
-    "longitude": 138.6001,
+    "latitude": -34.921127,
+    "longitude": 138.60776,
     "route_id": "BTANIC",
     "vehicle_id": "204",
     "type": "tram"
   },
   {
-    "latitude": -34.980427,
-    "longitude": 138.5122,
+    "latitude": -34.921787,
+    "longitude": 138.59462,
     "route_id": "GLNELG",
     "vehicle_id": "205",
     "type": "tram"
   },
   {
-    "latitude": -34.9363,
-    "longitude": 138.60033,
-    "route_id": "GLNELG",
-    "vehicle_id": "206",
-    "type": "tram"
-  },
-  {
-    "latitude": -34.92208,
-    "longitude": 138.588,
+    "latitude": -34.980064,
+    "longitude": 138.51956,
     "route_id": "GLNELG",
     "vehicle_id": "208",
     "type": "tram"
   },
   {
-    "latitude": -34.95628,
-    "longitude": 138.57661,
+    "latitude": -34.953247,
+    "longitude": 138.58263,
     "route_id": "GLNELG",
     "vehicle_id": "209",
     "type": "tram"
   },
   {
-    "latitude": -35.09288,
-    "longitude": 138.58876,
-    "route_id": "737",
-    "vehicle_id": "2403",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.189217,
-    "longitude": 138.48337,
-    "route_id": "751",
-    "vehicle_id": "2416",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.048874,
-    "longitude": 138.55974,
-    "route_id": "T721",
-    "vehicle_id": "2417",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.135235,
-    "longitude": 138.53708,
-    "route_id": "T722",
-    "vehicle_id": "2460",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.077923,
-    "longitude": 138.51555,
-    "route_id": "681",
-    "vehicle_id": "2462",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.11765,
-    "longitude": 138.48582,
-    "route_id": "734",
-    "vehicle_id": "2463",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.09452,
-    "longitude": 138.52849,
-    "route_id": "725",
-    "vehicle_id": "2464",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.151394,
-    "longitude": 138.47249,
-    "route_id": "745",
-    "vehicle_id": "2512",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.96657,
-    "longitude": 138.57274,
-    "route_id": "T721",
-    "vehicle_id": "2514",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.32496,
-    "longitude": 138.47371,
-    "route_id": "750",
-    "vehicle_id": "2517",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.99347,
-    "longitude": 138.57484,
-    "route_id": "720",
-    "vehicle_id": "2561",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.083202,
-    "longitude": 138.5202,
-    "route_id": "682",
-    "vehicle_id": "2574",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.07572,
-    "longitude": 138.53168,
-    "route_id": "734",
-    "vehicle_id": "2576",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.26767,
-    "longitude": 138.47656,
-    "route_id": "750B",
-    "vehicle_id": "2582",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.930267,
-    "longitude": 138.58803,
-    "route_id": "719",
-    "vehicle_id": "2583",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.9648,
-    "longitude": 138.62527,
-    "route_id": "783",
-    "vehicle_id": "2587",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.928677,
-    "longitude": 138.60062,
-    "route_id": "T721",
-    "vehicle_id": "2588",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.02312,
-    "longitude": 138.57053,
-    "route_id": "719",
-    "vehicle_id": "2590",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.13416,
-    "longitude": 138.49684,
-    "route_id": "725",
-    "vehicle_id": "2594",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.980198,
-    "longitude": 138.57396,
-    "route_id": "720",
-    "vehicle_id": "2595",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.028152,
-    "longitude": 138.52385,
-    "route_id": "734",
-    "vehicle_id": "2601",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.13405,
-    "longitude": 138.48601,
-    "route_id": "T722",
-    "vehicle_id": "2602",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.062443,
-    "longitude": 138.56068,
+    "latitude": -35.114147,
+    "longitude": 138.54622,
     "route_id": "733",
-    "vehicle_id": "2604",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.957287,
-    "longitude": 138.57228,
-    "route_id": "T722",
-    "vehicle_id": "2701",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.10469,
-    "longitude": 138.53517,
-    "route_id": "734",
-    "vehicle_id": "2703",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.147568,
-    "longitude": 138.51727,
-    "route_id": "743",
-    "vehicle_id": "2704",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.944485,
-    "longitude": 138.58084,
-    "route_id": "719",
-    "vehicle_id": "2709",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.940742,
-    "longitude": 138.60681,
-    "route_id": "190B",
-    "vehicle_id": "271",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.01472,
-    "longitude": 138.57156,
-    "route_id": "T722",
-    "vehicle_id": "2711",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.17103,
-    "longitude": 138.47601,
-    "route_id": "751",
-    "vehicle_id": "2713",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.017017,
-    "longitude": 138.56071,
-    "route_id": "681",
-    "vehicle_id": "2714",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.126072,
-    "longitude": 138.52582,
-    "route_id": "733",
-    "vehicle_id": "2719",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.277966,
-    "longitude": 138.45816,
-    "route_id": "750",
-    "vehicle_id": "2720",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.13675,
-    "longitude": 138.52466,
-    "route_id": "T722",
-    "vehicle_id": "2722",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.05661,
-    "longitude": 138.53522,
-    "route_id": "720",
-    "vehicle_id": "2723",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.06214,
-    "longitude": 138.55786,
-    "route_id": "T722",
-    "vehicle_id": "2732",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.01646,
-    "longitude": 138.57237,
-    "route_id": "T721",
-    "vehicle_id": "2741",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.924564,
-    "longitude": 138.59955,
-    "route_id": "T722",
-    "vehicle_id": "2742",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.07525,
-    "longitude": 138.55057,
-    "route_id": "T721",
-    "vehicle_id": "2745",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.201653,
-    "longitude": 138.48265,
-    "route_id": "747",
-    "vehicle_id": "2748",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.851887,
-    "longitude": 138.50949,
-    "route_id": "361",
-    "vehicle_id": "275",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.13819,
-    "longitude": 138.48616,
-    "route_id": "733",
-    "vehicle_id": "276",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.896782,
-    "longitude": 138.58546,
-    "route_id": "239",
-    "vehicle_id": "277",
+    "vehicle_id": "2400",
     "type": "bus"
   },
   {
     "latitude": 0.0,
     "longitude": 0.0,
+    "route_id": "719",
+    "vehicle_id": "2404",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.03623,
+    "longitude": 138.56017,
+    "route_id": "782",
+    "vehicle_id": "2451",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.928608,
+    "longitude": 138.59894,
+    "route_id": "T722",
+    "vehicle_id": "2460",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.986496,
+    "longitude": 138.57431,
+    "route_id": "720",
+    "vehicle_id": "2461",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.969654,
+    "longitude": 138.57315,
+    "route_id": "T722",
+    "vehicle_id": "2514",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.00833,
+    "longitude": 138.57607,
+    "route_id": "T721",
+    "vehicle_id": "2560",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.082157,
+    "longitude": 138.50888,
+    "route_id": "681",
+    "vehicle_id": "2570",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.09522,
+    "longitude": 138.53838,
+    "route_id": "T721",
+    "vehicle_id": "2572",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.01758,
+    "longitude": 138.54906,
+    "route_id": "681",
+    "vehicle_id": "2574",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.095467,
+    "longitude": 138.54698,
+    "route_id": "734",
+    "vehicle_id": "2577",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.190746,
+    "longitude": 138.49055,
+    "route_id": "751",
+    "vehicle_id": "2582",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.929085,
+    "longitude": 138.58986,
+    "route_id": "719",
+    "vehicle_id": "2583",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.02465,
+    "longitude": 138.57306,
+    "route_id": "681",
+    "vehicle_id": "2585",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.014946,
+    "longitude": 138.57237,
+    "route_id": "783",
+    "vehicle_id": "2587",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.115627,
+    "longitude": 138.52287,
+    "route_id": "T721",
+    "vehicle_id": "2588",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.1504,
+    "longitude": 138.4997,
+    "route_id": "747",
+    "vehicle_id": "2592",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.925,
+    "longitude": 138.59976,
+    "route_id": "T721",
+    "vehicle_id": "2594",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.149483,
+    "longitude": 138.47119,
+    "route_id": "745",
+    "vehicle_id": "2596",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.13867,
+    "longitude": 138.4859,
+    "route_id": "734",
+    "vehicle_id": "2601",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.035732,
+    "longitude": 138.55937,
+    "route_id": "T722",
+    "vehicle_id": "2602",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.146717,
+    "longitude": 138.5339,
+    "route_id": "T722",
+    "vehicle_id": "2701",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.12597,
+    "longitude": 138.48137,
+    "route_id": "734",
+    "vehicle_id": "2703",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.138657,
+    "longitude": 138.49695,
+    "route_id": "725",
+    "vehicle_id": "2704",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.204525,
+    "longitude": 138.4877,
+    "route_id": "745",
+    "vehicle_id": "2708",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.97733,
+    "longitude": 138.57375,
+    "route_id": "720",
+    "vehicle_id": "2709",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92101,
+    "longitude": 138.60904,
+    "route_id": "178",
+    "vehicle_id": "271",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.93856,
+    "longitude": 138.58627,
+    "route_id": "T721",
+    "vehicle_id": "2711",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.069557,
+    "longitude": 138.50713,
+    "route_id": "681",
+    "vehicle_id": "2714",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.056946,
+    "longitude": 138.5599,
+    "route_id": "733",
+    "vehicle_id": "2719",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.203228,
+    "longitude": 138.48305,
+    "route_id": "747",
+    "vehicle_id": "2722",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.083076,
+    "longitude": 138.53342,
+    "route_id": "734",
+    "vehicle_id": "2727",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.91107,
+    "longitude": 138.59918,
+    "route_id": "G10",
+    "vehicle_id": "273",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.14801,
+    "longitude": 138.5086,
+    "route_id": "743",
+    "vehicle_id": "2732",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.077587,
+    "longitude": 138.51051,
+    "route_id": "772",
+    "vehicle_id": "2734",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.308285,
+    "longitude": 138.45618,
+    "route_id": "750",
+    "vehicle_id": "2735",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.243984,
+    "longitude": 138.48154,
+    "route_id": "750B",
+    "vehicle_id": "2739",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.059097,
+    "longitude": 138.53346,
+    "route_id": "720",
+    "vehicle_id": "274",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.951187,
+    "longitude": 138.57477,
+    "route_id": "719",
+    "vehicle_id": "2740",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.026543,
+    "longitude": 138.5685,
+    "route_id": "T722",
+    "vehicle_id": "2742",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.139805,
+    "longitude": 138.53304,
+    "route_id": "T722",
+    "vehicle_id": "2743",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.13929,
+    "longitude": 138.4921,
+    "route_id": "725",
+    "vehicle_id": "2748",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.84592,
+    "longitude": 138.65414,
+    "route_id": "361",
+    "vehicle_id": "275",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.028076,
+    "longitude": 138.55559,
+    "route_id": "733",
+    "vehicle_id": "276",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.858765,
+    "longitude": 138.65771,
+    "route_id": "273",
+    "vehicle_id": "277",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.140488,
+    "longitude": 138.49187,
+    "route_id": "T721",
+    "vehicle_id": "2801",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.02883,
+    "longitude": 138.54782,
+    "route_id": "785",
+    "vehicle_id": "2803",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.02883,
+    "longitude": 138.54782,
+    "route_id": "785",
+    "vehicle_id": "2805",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.27851,
+    "longitude": 138.46957,
+    "route_id": "756",
+    "vehicle_id": "2806",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.114517,
+    "longitude": 138.54802,
+    "route_id": "733",
+    "vehicle_id": "2807",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.023174,
+    "longitude": 138.57042,
     "route_id": "T721",
     "vehicle_id": "2808",
     "type": "bus"
   },
   {
-    "latitude": -35.108395,
-    "longitude": 138.55739,
-    "route_id": "733",
-    "vehicle_id": "2809",
+    "latitude": -35.02887,
+    "longitude": 138.54715,
+    "route_id": "784",
+    "vehicle_id": "2811",
     "type": "bus"
   },
   {
-    "latitude": -35.01672,
-    "longitude": 138.57043,
-    "route_id": "681",
-    "vehicle_id": "2862",
+    "latitude": -35.152122,
+    "longitude": 138.47292,
+    "route_id": "751",
+    "vehicle_id": "2812",
     "type": "bus"
   },
   {
-    "latitude": -35.076298,
-    "longitude": 138.50964,
-    "route_id": "681",
+    "latitude": -35.028957,
+    "longitude": 138.54558,
+    "route_id": "734",
+    "vehicle_id": "2814",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.080017,
+    "longitude": 138.50652,
+    "route_id": "682",
+    "vehicle_id": "2815",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.047447,
+    "longitude": 138.56,
+    "route_id": "734",
+    "vehicle_id": "2819",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92872,
+    "longitude": 138.5996,
+    "route_id": "632",
+    "vehicle_id": "2823",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92166,
+    "longitude": 138.59596,
+    "route_id": "281",
+    "vehicle_id": "283",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.891567,
+    "longitude": 138.51955,
+    "route_id": "117",
+    "vehicle_id": "284",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.082275,
+    "longitude": 138.53442,
+    "route_id": "682",
     "vehicle_id": "2863",
     "type": "bus"
   },
   {
-    "latitude": -34.9155,
-    "longitude": 138.58449,
-    "route_id": "GRNG",
-    "vehicle_id": "3013",
-    "type": "train"
-  },
-  {
-    "latitude": -34.899624,
-    "longitude": 138.49316,
+    "latitude": -34.899967,
+    "longitude": 138.49136,
     "route_id": "GRNG",
     "vehicle_id": "3011",
     "type": "train"
   },
   {
-    "latitude": -34.99563,
-    "longitude": 138.60551,
+    "latitude": -35.01105,
+    "longitude": 138.601,
     "route_id": "BEL",
     "vehicle_id": "3026",
     "type": "train"
   },
   {
-    "latitude": -34.874054,
-    "longitude": 138.53387,
+    "latitude": -34.8973,
+    "longitude": 138.5641,
+    "route_id": "PTDOCK",
+    "vehicle_id": "3017",
+    "type": "train"
+  },
+  {
+    "latitude": -34.998016,
+    "longitude": 138.63281,
+    "route_id": "BEL",
+    "vehicle_id": "3030",
+    "type": "train"
+  },
+  {
+    "latitude": -34.86215,
+    "longitude": 138.5216,
     "route_id": "OUTHA",
     "vehicle_id": "3124",
     "type": "train"
   },
   {
-    "latitude": -34.998093,
-    "longitude": 138.6324,
-    "route_id": "BEL",
-    "vehicle_id": "3128",
-    "type": "train"
-  },
-  {
-    "latitude": -35.004417,
-    "longitude": 138.60094,
+    "latitude": -34.939995,
+    "longitude": 138.58263,
     "route_id": "BEL",
     "vehicle_id": "3132",
     "type": "train"
   },
   {
-    "latitude": -35.01144,
-    "longitude": 138.76927,
-    "route_id": "T801",
+    "latitude": -34.983784,
+    "longitude": 138.61115,
+    "route_id": "BEL",
+    "vehicle_id": "3140",
+    "type": "train"
+  },
+  {
+    "latitude": -35.067703,
+    "longitude": 138.85562,
+    "route_id": "837",
     "vehicle_id": "3201",
     "type": "bus"
   },
   {
-    "latitude": -34.928062,
-    "longitude": 138.60605,
-    "route_id": "T800",
+    "latitude": -34.99839,
+    "longitude": 138.70703,
+    "route_id": "T801",
+    "vehicle_id": "3203",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.93361,
+    "longitude": 138.61252,
+    "route_id": "820",
+    "vehicle_id": "3206",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924118,
+    "longitude": 138.60385,
+    "route_id": "T863",
+    "vehicle_id": "3208",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.063107,
+    "longitude": 138.86208,
+    "route_id": "838H",
     "vehicle_id": "3209",
     "type": "bus"
   },
   {
-    "latitude": -34.95161,
-    "longitude": 138.63416,
+    "latitude": -35.06472,
+    "longitude": 138.8639,
     "route_id": "T801",
     "vehicle_id": "3210",
     "type": "bus"
   },
   {
-    "latitude": -34.994434,
-    "longitude": 138.71663,
-    "route_id": "866",
-    "vehicle_id": "3212",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.065952,
-    "longitude": 138.85956,
-    "route_id": "T800",
+    "latitude": -34.92462,
+    "longitude": 138.59412,
+    "route_id": "861",
     "vehicle_id": "3214",
     "type": "bus"
   },
   {
-    "latitude": -34.938187,
-    "longitude": 138.61285,
+    "latitude": -34.94051,
+    "longitude": 138.6159,
     "route_id": "820",
     "vehicle_id": "3215",
     "type": "bus"
   },
   {
-    "latitude": -34.952034,
-    "longitude": 138.63467,
-    "route_id": "T800",
-    "vehicle_id": "3226",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.94733,
-    "longitude": 138.62688,
+    "latitude": -34.941334,
+    "longitude": 138.61699,
     "route_id": "861",
-    "vehicle_id": "3227",
+    "vehicle_id": "3514",
     "type": "bus"
   },
   {
-    "latitude": -35.073788,
-    "longitude": 138.86324,
+    "latitude": -35.03335,
+    "longitude": 138.91165,
+    "route_id": "890",
+    "vehicle_id": "3229",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.959095,
+    "longitude": 138.73578,
+    "route_id": "822",
+    "vehicle_id": "3233",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9984,
+    "longitude": 138.70764,
+    "route_id": "866",
+    "vehicle_id": "3234",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.028847,
+    "longitude": 138.80174,
+    "route_id": "T800",
+    "vehicle_id": "3235",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.258663,
+    "longitude": 138.89018,
     "route_id": "852",
+    "vehicle_id": "3273",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.012722,
+    "longitude": 138.74455,
+    "route_id": "865",
+    "vehicle_id": "3274",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.063858,
+    "longitude": 138.8631,
+    "route_id": "839",
     "vehicle_id": "3276",
     "type": "bus"
   },
   {
-    "latitude": -34.921967,
-    "longitude": 138.59314,
-    "route_id": "T801",
+    "latitude": -35.068188,
+    "longitude": 138.86119,
+    "route_id": "838H",
+    "vehicle_id": "3277",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924206,
+    "longitude": 138.60573,
+    "route_id": "T800",
     "vehicle_id": "3313",
     "type": "bus"
   },
   {
-    "latitude": -34.98598,
-    "longitude": 138.69197,
+    "latitude": -34.964634,
+    "longitude": 138.62563,
+    "route_id": "888",
+    "vehicle_id": "3316",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.94064,
+    "longitude": 138.62459,
+    "route_id": "870",
+    "vehicle_id": "3351",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92306,
+    "longitude": 138.5875,
     "route_id": "T801",
     "vehicle_id": "3352",
     "type": "bus"
   },
   {
-    "latitude": -34.934715,
-    "longitude": 138.60646,
-    "route_id": "T800",
+    "latitude": -34.98105,
+    "longitude": 138.68436,
+    "route_id": "T863",
     "vehicle_id": "3353",
     "type": "bus"
   },
   {
-    "latitude": -35.03823,
-    "longitude": 138.81958,
+    "latitude": -34.924625,
+    "longitude": 138.5937,
+    "route_id": "T800",
+    "vehicle_id": "3355",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.05376,
+    "longitude": 138.84871,
+    "route_id": "T801",
+    "vehicle_id": "3356",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.99601,
+    "longitude": 138.7406,
+    "route_id": "T800",
+    "vehicle_id": "3358",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924683,
+    "longitude": 138.59467,
     "route_id": "T801",
     "vehicle_id": "3359",
     "type": "bus"
   },
   {
-    "latitude": -35.006847,
-    "longitude": 138.77592,
-    "route_id": "T800",
+    "latitude": -35.01292,
+    "longitude": 138.77126,
+    "route_id": "876",
+    "vehicle_id": "3369",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.964634,
+    "longitude": 138.62563,
+    "route_id": "882",
     "vehicle_id": "3375",
     "type": "bus"
   },
   {
-    "latitude": -35.039078,
-    "longitude": 138.81403,
-    "route_id": "T800",
+    "latitude": -35.03961,
+    "longitude": 138.88443,
+    "route_id": "837",
     "vehicle_id": "3503",
     "type": "bus"
   },
   {
-    "latitude": -35.06616,
-    "longitude": 138.86105,
-    "route_id": "838H",
-    "vehicle_id": "3505",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.93892,
-    "longitude": 138.61298,
-    "route_id": "820",
-    "vehicle_id": "3507",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.063282,
-    "longitude": 138.8624,
-    "route_id": "839",
+    "latitude": -35.027626,
+    "longitude": 138.7975,
+    "route_id": "T800",
     "vehicle_id": "3508",
     "type": "bus"
   },
   {
-    "latitude": -34.957596,
-    "longitude": 138.63922,
-    "route_id": "861",
-    "vehicle_id": "3509",
+    "latitude": -34.94187,
+    "longitude": 138.61778,
+    "route_id": "T800",
+    "vehicle_id": "3511",
     "type": "bus"
   },
   {
-    "latitude": -35.042435,
-    "longitude": 138.82724,
+    "latitude": -34.94896,
+    "longitude": 138.87698,
     "route_id": "835",
     "vehicle_id": "3512",
     "type": "bus"
   },
   {
-    "latitude": -34.92433,
-    "longitude": 138.6056,
-    "route_id": "861",
+    "latitude": -35.001324,
+    "longitude": 138.71918,
+    "route_id": "T800",
     "vehicle_id": "3513",
     "type": "bus"
   },
   {
-    "latitude": -34.960373,
-    "longitude": 138.64153,
-    "route_id": "T800",
-    "vehicle_id": "3514",
+    "latitude": -34.941277,
+    "longitude": 138.61684,
+    "route_id": "T801",
+    "vehicle_id": "3515",
     "type": "bus"
   },
   {
-    "latitude": -34.92178,
-    "longitude": 138.59047,
+    "latitude": -35.01104,
+    "longitude": 138.7475,
     "route_id": "T801",
     "vehicle_id": "3516",
     "type": "bus"
   },
   {
-    "latitude": -34.574337,
-    "longitude": 138.74641,
-    "route_id": "491",
+    "latitude": -34.96403,
+    "longitude": 138.64513,
+    "route_id": "T800",
+    "vehicle_id": "3518",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.962452,
+    "longitude": 138.64317,
+    "route_id": "861",
+    "vehicle_id": "3519",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.67067,
+    "longitude": 138.70032,
+    "route_id": "440",
+    "vehicle_id": "401",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.607723,
+    "longitude": 138.7401,
+    "route_id": "494",
     "vehicle_id": "405",
     "type": "bus"
   },
   {
-    "latitude": -34.72441,
-    "longitude": 138.68135,
-    "route_id": "400",
+    "latitude": -34.844738,
+    "longitude": 138.50807,
+    "route_id": "254X",
+    "vehicle_id": "408",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.765675,
+    "longitude": 138.647,
+    "route_id": "225M",
     "vehicle_id": "410",
     "type": "bus"
   },
   {
-    "latitude": -34.681824,
-    "longitude": 138.68707,
-    "route_id": "GAW",
+    "latitude": -34.87633,
+    "longitude": 138.58218,
+    "route_id": "GAWC",
     "vehicle_id": "4001",
     "type": "train"
   },
   {
-    "latitude": -34.97642,
-    "longitude": 138.57086,
-    "route_id": "FLNDRS",
+    "latitude": -35.085526,
+    "longitude": 138.4981,
+    "route_id": "SEAFRD",
     "vehicle_id": "4002",
     "type": "train"
   },
   {
-    "latitude": -34.960438,
-    "longitude": 138.58168,
+    "latitude": -35.136692,
+    "longitude": 138.49377,
     "route_id": "SEAFRD",
     "vehicle_id": "4005",
     "type": "train"
   },
   {
-    "latitude": -34.858738,
-    "longitude": 138.57828,
+    "latitude": -34.59451,
+    "longitude": 138.74767,
     "route_id": "GAWC",
     "vehicle_id": "4008",
     "type": "train"
@@ -2151,364 +2900,392 @@
   {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "G10",
+    "route_id": "472",
     "vehicle_id": "411",
     "type": "bus"
   },
   {
-    "latitude": -35.109615,
-    "longitude": 138.49187,
+    "latitude": -34.961548,
+    "longitude": 138.58026,
+    "route_id": "FLNDRS",
+    "vehicle_id": "4011",
+    "type": "train"
+  },
+  {
+    "latitude": -34.975033,
+    "longitude": 138.57132,
     "route_id": "SEAFRD",
     "vehicle_id": "4016",
     "type": "train"
   },
   {
-    "latitude": -35.021633,
-    "longitude": 138.51918,
+    "latitude": -35.031128,
+    "longitude": 138.52144,
     "route_id": "SEAFRD",
-    "vehicle_id": "4029",
+    "vehicle_id": "4017",
     "type": "train"
   },
   {
-    "latitude": -34.884754,
-    "longitude": 138.58327,
-    "route_id": "GAW",
+    "latitude": -34.684143,
+    "longitude": 138.68382,
+    "route_id": "GAWC",
     "vehicle_id": "4018",
     "type": "train"
   },
   {
-    "latitude": -34.972267,
-    "longitude": 138.57133,
-    "route_id": "FLNDRS",
+    "latitude": -34.933064,
+    "longitude": 138.58136,
+    "route_id": "SEAFRD",
     "vehicle_id": "4019",
     "type": "train"
   },
   {
-    "latitude": -34.925415,
-    "longitude": 138.59981,
-    "route_id": "228F",
+    "latitude": -34.924942,
+    "longitude": 138.58781,
+    "route_id": "100",
     "vehicle_id": "412",
     "type": "bus"
   },
   {
-    "latitude": -34.937378,
-    "longitude": 138.58205,
-    "route_id": "SEAFRD",
+    "latitude": -34.988472,
+    "longitude": 138.56348,
+    "route_id": "FLNDRS",
     "vehicle_id": "4020",
     "type": "train"
   },
   {
-    "latitude": -35.18921,
-    "longitude": 138.48354,
-    "route_id": "SEAFRD",
-    "vehicle_id": "4026",
-    "type": "train"
-  },
-  {
-    "latitude": -34.766716,
-    "longitude": 138.64209,
+    "latitude": -34.668106,
+    "longitude": 138.69672,
     "route_id": "GAW",
     "vehicle_id": "4028",
     "type": "train"
   },
   {
-    "latitude": -34.71678,
-    "longitude": 138.66939,
-    "route_id": "441",
-    "vehicle_id": "413",
-    "type": "bus"
+    "latitude": -34.997932,
+    "longitude": 138.55421,
+    "route_id": "SEAFRD",
+    "vehicle_id": "4029",
+    "type": "train"
   },
   {
-    "latitude": -34.608448,
-    "longitude": 138.73962,
+    "latitude": -34.864857,
+    "longitude": 138.57947,
     "route_id": "GAW",
     "vehicle_id": "4031",
     "type": "train"
   },
   {
-    "latitude": -34.775494,
-    "longitude": 138.63744,
-    "route_id": "GAWC",
+    "latitude": -34.7856,
+    "longitude": 138.62846,
+    "route_id": "GAW",
     "vehicle_id": "4032",
     "type": "train"
   },
   {
-    "latitude": -34.91382,
-    "longitude": 138.52103,
-    "route_id": "286",
+    "latitude": -35.16148,
+    "longitude": 138.48901,
+    "route_id": "SEAFRD",
+    "vehicle_id": "4034",
+    "type": "train"
+  },
+  {
+    "latitude": -34.910305,
+    "longitude": 138.59874,
+    "route_id": "228F",
     "vehicle_id": "418",
     "type": "bus"
   },
   {
-    "latitude": -34.67605,
-    "longitude": 138.692,
+    "latitude": -34.762707,
+    "longitude": 138.64238,
     "route_id": "GAWC",
     "vehicle_id": "4027",
     "type": "train"
   },
   {
-    "latitude": -35.017628,
-    "longitude": 138.54579,
+    "latitude": -34.909542,
+    "longitude": 138.62787,
+    "route_id": "174",
+    "vehicle_id": "451",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.884987,
+    "longitude": 138.53157,
     "route_id": "J8",
     "vehicle_id": "5001",
     "type": "bus"
   },
   {
-    "latitude": -34.92448,
-    "longitude": 138.58766,
-    "route_id": "144",
+    "latitude": -34.96815,
+    "longitude": 138.55571,
+    "route_id": "100",
     "vehicle_id": "5002",
     "type": "bus"
   },
   {
-    "latitude": -34.87427,
-    "longitude": 138.58412,
-    "route_id": "235",
+    "latitude": -34.845135,
+    "longitude": 138.67093,
+    "route_id": "271",
     "vehicle_id": "5003",
     "type": "bus"
   },
   {
-    "latitude": -34.872337,
-    "longitude": 138.51546,
-    "route_id": "371",
+    "latitude": -34.876614,
+    "longitude": 138.55074,
+    "route_id": "J8",
     "vehicle_id": "5004",
     "type": "bus"
   },
   {
-    "latitude": -34.905968,
-    "longitude": 138.60931,
-    "route_id": "203",
-    "vehicle_id": "5005",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.009846,
-    "longitude": 138.52477,
-    "route_id": "263",
+    "latitude": -34.929184,
+    "longitude": 138.5874,
+    "route_id": "202F",
     "vehicle_id": "5007",
     "type": "bus"
   },
   {
-    "latitude": -34.923176,
-    "longitude": 138.6056,
-    "route_id": "W91C",
+    "latitude": -34.86744,
+    "longitude": 138.63103,
+    "route_id": "208",
     "vehicle_id": "5008",
     "type": "bus"
   },
   {
-    "latitude": -34.88842,
-    "longitude": 138.54845,
+    "latitude": -35.023975,
+    "longitude": 138.53255,
+    "route_id": "645",
+    "vehicle_id": "5009",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.704983,
+    "longitude": 138.6591,
+    "route_id": "430",
+    "vehicle_id": "501",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.95533,
+    "longitude": 138.61467,
+    "route_id": "170",
+    "vehicle_id": "5011",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.01763,
+    "longitude": 138.54555,
     "route_id": "J8",
     "vehicle_id": "5013",
     "type": "bus"
   },
   {
-    "latitude": -34.971664,
-    "longitude": 138.56425,
-    "route_id": "241",
+    "latitude": -34.89363,
+    "longitude": 138.4928,
+    "route_id": "288",
+    "vehicle_id": "5014",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.01874,
+    "longitude": 138.57281,
+    "route_id": "600A",
     "vehicle_id": "5016",
     "type": "bus"
   },
   {
-    "latitude": -34.92233,
-    "longitude": 138.60555,
-    "route_id": "167C",
+    "latitude": -34.94171,
+    "longitude": 138.57787,
+    "route_id": "167",
     "vehicle_id": "5017",
     "type": "bus"
   },
   {
-    "latitude": -34.922676,
-    "longitude": 138.59941,
-    "route_id": "230",
-    "vehicle_id": "5019",
+    "latitude": -34.650295,
+    "longitude": 138.6426,
+    "route_id": "487",
+    "vehicle_id": "502",
     "type": "bus"
   },
   {
-    "latitude": -34.992104,
-    "longitude": 138.5837,
-    "route_id": "W90",
-    "vehicle_id": "5024",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.92098,
-    "longitude": 138.64119,
-    "route_id": "H21",
+    "latitude": -34.963932,
+    "longitude": 138.59059,
+    "route_id": "G21X",
     "vehicle_id": "504",
     "type": "bus"
   },
   {
-    "latitude": -34.924057,
-    "longitude": 138.5995,
-    "route_id": "254X",
-    "vehicle_id": "524",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.804123,
-    "longitude": 138.61226,
-    "route_id": "225",
-    "vehicle_id": "525",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.82842,
-    "longitude": 138.64983,
+    "latitude": -34.716805,
+    "longitude": 138.66907,
     "route_id": "560",
     "vehicle_id": "530",
     "type": "bus"
   },
   {
-    "latitude": -34.811707,
-    "longitude": 138.6212,
+    "latitude": -34.80898,
+    "longitude": 138.65434,
     "route_id": "225",
     "vehicle_id": "531",
     "type": "bus"
   },
   {
-    "latitude": -34.888233,
-    "longitude": 138.68074,
-    "route_id": "178S",
+    "latitude": -34.95729,
+    "longitude": 138.56532,
+    "route_id": "248",
+    "vehicle_id": "532",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.924652,
+    "longitude": 138.59532,
+    "route_id": "157",
     "vehicle_id": "533",
     "type": "bus"
   },
   {
-    "latitude": -34.96474,
-    "longitude": 138.62335,
-    "route_id": "170",
-    "vehicle_id": "535",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.911457,
-    "longitude": 138.60225,
-    "route_id": "271",
-    "vehicle_id": "537",
-    "type": "bus"
-  },
-  {
-    "latitude": -35.028877,
-    "longitude": 138.5874,
-    "route_id": "601",
+    "latitude": -34.955433,
+    "longitude": 138.60013,
+    "route_id": "200B",
     "vehicle_id": "538",
     "type": "bus"
   },
   {
-    "latitude": -34.939434,
-    "longitude": 138.57085,
-    "route_id": "248",
+    "latitude": -34.81852,
+    "longitude": 138.6629,
+    "route_id": "203F",
     "vehicle_id": "540",
     "type": "bus"
   },
   {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "400",
+    "route_id": "441",
     "vehicle_id": "541",
     "type": "bus"
   },
   {
-    "latitude": -34.761696,
-    "longitude": 138.64333,
-    "route_id": "430",
-    "vehicle_id": "544",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.855515,
-    "longitude": 138.63243,
-    "route_id": "208",
+    "latitude": -34.910038,
+    "longitude": 138.59814,
+    "route_id": "225F",
     "vehicle_id": "547",
     "type": "bus"
   },
   {
-    "latitude": -34.695156,
-    "longitude": 138.70558,
-    "route_id": "441",
+    "latitude": -34.85171,
+    "longitude": 138.52077,
+    "route_id": "254X",
+    "vehicle_id": "548",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.673237,
+    "longitude": 138.66559,
+    "route_id": "451",
     "vehicle_id": "549",
     "type": "bus"
   },
   {
-    "latitude": -34.719425,
-    "longitude": 138.67883,
+    "latitude": -34.762207,
+    "longitude": 138.64261,
     "route_id": "430",
     "vehicle_id": "550",
     "type": "bus"
   },
   {
-    "latitude": -34.68338,
-    "longitude": 138.65674,
+    "latitude": -34.68371,
+    "longitude": 138.65642,
     "route_id": "451",
     "vehicle_id": "551",
     "type": "bus"
   },
   {
-    "latitude": -34.71509,
-    "longitude": 138.67099,
+    "latitude": -34.709972,
+    "longitude": 138.66165,
     "route_id": "450",
     "vehicle_id": "552",
     "type": "bus"
   },
   {
-    "latitude": -34.824512,
-    "longitude": 138.63574,
-    "route_id": "565",
+    "latitude": -34.806892,
+    "longitude": 138.61699,
+    "route_id": "411",
     "vehicle_id": "553",
     "type": "bus"
   },
   {
-    "latitude": -34.832264,
-    "longitude": 138.64815,
-    "route_id": "203",
+    "latitude": -34.95694,
+    "longitude": 138.56586,
+    "route_id": "245",
     "vehicle_id": "554",
     "type": "bus"
   },
   {
-    "latitude": -34.75395,
-    "longitude": 138.6364,
-    "route_id": "400",
+    "latitude": -34.756958,
+    "longitude": 138.63275,
+    "route_id": "401",
     "vehicle_id": "555",
     "type": "bus"
   },
   {
-    "latitude": -34.92103,
-    "longitude": 138.59947,
-    "route_id": "200C",
+    "latitude": -34.924156,
+    "longitude": 138.60312,
+    "route_id": "H24",
     "vehicle_id": "556",
     "type": "bus"
   },
   {
-    "latitude": -34.898655,
-    "longitude": 138.59688,
+    "latitude": -34.699364,
+    "longitude": 138.69107,
     "route_id": "228F",
     "vehicle_id": "557",
     "type": "bus"
   },
   {
-    "latitude": -34.6863,
-    "longitude": 138.69147,
+    "latitude": -34.7596,
+    "longitude": 138.64255,
+    "route_id": "411",
+    "vehicle_id": "558",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.953182,
+    "longitude": 138.58977,
+    "route_id": "G10",
+    "vehicle_id": "562",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.908817,
+    "longitude": 138.59698,
     "route_id": "228F",
     "vehicle_id": "563",
     "type": "bus"
   },
   {
-    "latitude": -34.746304,
-    "longitude": 138.67665,
+    "latitude": -34.928383,
+    "longitude": 138.60072,
     "route_id": "228F",
     "vehicle_id": "564",
     "type": "bus"
   },
   {
-    "latitude": -34.715847,
-    "longitude": 138.67146,
-    "route_id": "451",
+    "latitude": -34.748363,
+    "longitude": 138.61867,
+    "route_id": "403",
+    "vehicle_id": "565",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.687206,
+    "longitude": 138.7148,
+    "route_id": "442",
     "vehicle_id": "566",
     "type": "bus"
   },
   {
-    "latitude": -34.762066,
-    "longitude": 138.64825,
-    "route_id": "401",
+    "latitude": -34.761845,
+    "longitude": 138.64818,
+    "route_id": "411",
     "vehicle_id": "567",
     "type": "bus"
   },
@@ -2520,87 +3297,115 @@
     "type": "bus"
   },
   {
-    "latitude": -34.778122,
-    "longitude": 138.66742,
-    "route_id": "560",
+    "latitude": -34.873486,
+    "longitude": 138.6691,
+    "route_id": "556",
     "vehicle_id": "569",
     "type": "bus"
   },
   {
-    "latitude": -35.02478,
-    "longitude": 138.5732,
+    "latitude": -34.92114,
+    "longitude": 138.60643,
+    "route_id": "H30",
+    "vehicle_id": "5702",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.90177,
+    "longitude": 138.63948,
     "route_id": "300",
     "vehicle_id": "5703",
     "type": "bus"
   },
   {
-    "latitude": -34.90598,
-    "longitude": 138.64668,
+    "latitude": -34.91317,
+    "longitude": 138.67378,
+    "route_id": "106",
+    "vehicle_id": "5705",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9254,
+    "longitude": 138.50162,
     "route_id": "H30",
     "vehicle_id": "5706",
     "type": "bus"
   },
   {
-    "latitude": -34.928226,
-    "longitude": 138.60071,
-    "route_id": "171",
+    "latitude": -34.926575,
+    "longitude": 138.59969,
+    "route_id": "230",
     "vehicle_id": "5710",
     "type": "bus"
   },
   {
-    "latitude": -34.888905,
-    "longitude": 138.6692,
-    "route_id": "178",
+    "latitude": -34.977303,
+    "longitude": 138.61566,
+    "route_id": "171",
     "vehicle_id": "5711",
     "type": "bus"
   },
   {
-    "latitude": -34.92373,
-    "longitude": 138.59967,
+    "latitude": -34.877586,
+    "longitude": 138.68555,
+    "route_id": "930",
+    "vehicle_id": "5712",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.853897,
+    "longitude": 138.63185,
     "route_id": "208",
     "vehicle_id": "5714",
     "type": "bus"
   },
   {
-    "latitude": -34.920498,
-    "longitude": 138.58269,
-    "route_id": "157",
-    "vehicle_id": "5718",
+    "latitude": -34.8686,
+    "longitude": 138.66307,
+    "route_id": "178",
+    "vehicle_id": "5715",
     "type": "bus"
   },
   {
-    "latitude": -34.864548,
-    "longitude": 138.70291,
-    "route_id": "178",
+    "latitude": -34.94102,
+    "longitude": 138.60072,
+    "route_id": "200B",
+    "vehicle_id": "5717",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.938107,
+    "longitude": 138.61287,
+    "route_id": "171",
     "vehicle_id": "5721",
     "type": "bus"
   },
   {
-    "latitude": -34.91581,
-    "longitude": 138.60551,
-    "route_id": "239",
-    "vehicle_id": "5722",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.96342,
-    "longitude": 138.55585,
-    "route_id": "265",
-    "vehicle_id": "5725",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.92093,
-    "longitude": 138.63957,
-    "route_id": "H21",
+    "latitude": -34.83048,
+    "longitude": 138.59563,
+    "route_id": "238",
     "vehicle_id": "5726",
     "type": "bus"
   },
   {
-    "latitude": -34.985054,
-    "longitude": 138.59879,
-    "route_id": "200",
+    "latitude": -34.857883,
+    "longitude": 138.63512,
+    "route_id": "206",
     "vehicle_id": "5727",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.976624,
+    "longitude": 138.59996,
+    "route_id": "190",
+    "vehicle_id": "5728",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.922447,
+    "longitude": 138.64104,
+    "route_id": "992",
+    "vehicle_id": "5729",
     "type": "bus"
   },
   {
@@ -2611,289 +3416,352 @@
     "type": "bus"
   },
   {
-    "latitude": -34.89857,
-    "longitude": 138.59483,
-    "route_id": "G10B",
+    "latitude": -35.04176,
+    "longitude": 138.5699,
+    "route_id": "G21",
     "vehicle_id": "5732",
     "type": "bus"
   },
   {
-    "latitude": -35.02353,
-    "longitude": 138.57011,
+    "latitude": -34.966396,
+    "longitude": 138.58876,
+    "route_id": "100",
+    "vehicle_id": "5734",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.093285,
+    "longitude": 138.55286,
     "route_id": "600",
     "vehicle_id": "5736",
     "type": "bus"
   },
   {
-    "latitude": -35.02491,
-    "longitude": 138.57294,
-    "route_id": "G10",
-    "vehicle_id": "5740",
+    "latitude": -34.996357,
+    "longitude": 138.53929,
+    "route_id": "991",
+    "vehicle_id": "5737",
     "type": "bus"
   },
   {
-    "latitude": -34.848583,
-    "longitude": 138.59341,
+    "latitude": -34.952038,
+    "longitude": 138.58125,
+    "route_id": "W91",
+    "vehicle_id": "5738",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.024677,
+    "longitude": 138.57312,
     "route_id": "G10",
+    "vehicle_id": "5739",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.97981,
+    "longitude": 138.5698,
+    "route_id": "241",
+    "vehicle_id": "5744",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.925938,
+    "longitude": 138.59966,
+    "route_id": "208",
+    "vehicle_id": "5745",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.008423,
+    "longitude": 138.55821,
+    "route_id": "989",
+    "vehicle_id": "5746",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.96134,
+    "longitude": 138.58131,
+    "route_id": "W90",
+    "vehicle_id": "5747",
+    "type": "bus"
+  },
+  {
+    "latitude": -35.023453,
+    "longitude": 138.56783,
+    "route_id": "G10",
+    "vehicle_id": "5749",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.956062,
+    "longitude": 138.59004,
+    "route_id": "G20",
     "vehicle_id": "5752",
     "type": "bus"
   },
   {
-    "latitude": -34.890553,
-    "longitude": 138.59424,
-    "route_id": "G10",
+    "latitude": -34.91176,
+    "longitude": 138.59897,
+    "route_id": "263",
     "vehicle_id": "5753",
     "type": "bus"
   },
   {
-    "latitude": -35.043476,
-    "longitude": 138.53392,
-    "route_id": "645",
+    "latitude": -35.0435,
+    "longitude": 138.62396,
+    "route_id": "673",
+    "vehicle_id": "5755",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.976715,
+    "longitude": 138.51987,
+    "route_id": "262",
     "vehicle_id": "5756",
     "type": "bus"
   },
   {
-    "latitude": -34.899296,
-    "longitude": 138.57967,
-    "route_id": "252",
-    "vehicle_id": "5764",
+    "latitude": -34.9432,
+    "longitude": 138.5532,
+    "route_id": "H20",
+    "vehicle_id": "5758",
     "type": "bus"
   },
   {
-    "latitude": -35.05741,
-    "longitude": 138.60089,
-    "route_id": "G20",
+    "latitude": -34.92098,
+    "longitude": 138.59929,
+    "route_id": "G10",
     "vehicle_id": "579",
     "type": "bus"
   },
   {
-    "latitude": -34.769222,
-    "longitude": 138.63141,
-    "route_id": "405",
+    "latitude": -34.770615,
+    "longitude": 138.70598,
+    "route_id": "415",
     "vehicle_id": "580",
     "type": "bus"
   },
   {
-    "latitude": -34.905792,
-    "longitude": 138.63106,
-    "route_id": "178",
+    "latitude": -34.873848,
+    "longitude": 138.66917,
+    "route_id": "H20R",
     "vehicle_id": "5804",
     "type": "bus"
   },
   {
-    "latitude": -34.844223,
-    "longitude": 138.50685,
-    "route_id": "252",
+    "latitude": -34.927654,
+    "longitude": 138.59946,
+    "route_id": "202F",
+    "vehicle_id": "5805",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.9116,
+    "longitude": 138.59903,
+    "route_id": "263",
     "vehicle_id": "5806",
     "type": "bus"
   },
   {
-    "latitude": -34.92123,
-    "longitude": 138.60751,
+    "latitude": -35.017776,
+    "longitude": 138.54678,
     "route_id": "W90",
     "vehicle_id": "5807",
     "type": "bus"
   },
   {
-    "latitude": -35.05232,
-    "longitude": 138.59221,
-    "route_id": "G21",
+    "latitude": -34.99219,
+    "longitude": 138.60225,
+    "route_id": "200",
     "vehicle_id": "5808",
     "type": "bus"
   },
   {
-    "latitude": -34.924923,
-    "longitude": 138.59958,
+    "latitude": -34.811714,
+    "longitude": 138.6091,
     "route_id": "222",
     "vehicle_id": "5813",
     "type": "bus"
   },
   {
-    "latitude": -34.911545,
-    "longitude": 138.6022,
+    "latitude": -34.91641,
+    "longitude": 138.60573,
     "route_id": "98A",
     "vehicle_id": "5815",
     "type": "bus"
   },
   {
-    "latitude": -34.921513,
-    "longitude": 138.61073,
+    "latitude": -34.920834,
+    "longitude": 138.61205,
+    "route_id": "H33",
+    "vehicle_id": "5817",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.92845,
+    "longitude": 138.61195,
     "route_id": "99A",
     "vehicle_id": "5821",
     "type": "bus"
   },
   {
-    "latitude": -34.931812,
-    "longitude": 138.59453,
+    "latitude": -34.928764,
+    "longitude": 138.59868,
     "route_id": "98A",
     "vehicle_id": "5822",
     "type": "bus"
   },
   {
-    "latitude": -34.908077,
-    "longitude": 138.6055,
-    "route_id": "206",
+    "latitude": -34.9211,
+    "longitude": 138.59947,
+    "route_id": "200C",
     "vehicle_id": "5826",
     "type": "bus"
   },
   {
-    "latitude": -34.923836,
-    "longitude": 138.59969,
-    "route_id": "200",
-    "vehicle_id": "5828",
+    "latitude": -35.0103,
+    "longitude": 138.52226,
+    "route_id": "265",
+    "vehicle_id": "5827",
     "type": "bus"
   },
   {
-    "latitude": -35.07244,
-    "longitude": 138.58331,
-    "route_id": "320",
-    "vehicle_id": "5830",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.91398,
-    "longitude": 138.65623,
-    "route_id": "106",
+    "latitude": -34.92497,
+    "longitude": 138.589,
+    "route_id": "168",
     "vehicle_id": "5832",
     "type": "bus"
   },
   {
-    "latitude": -34.716797,
-    "longitude": 138.66925,
-    "route_id": "440",
-    "vehicle_id": "584",
+    "latitude": -34.97829,
+    "longitude": 138.51227,
+    "route_id": "265",
+    "vehicle_id": "5833",
     "type": "bus"
   },
   {
-    "latitude": -34.924377,
-    "longitude": 138.59874,
+    "latitude": -34.87417,
+    "longitude": 138.66931,
     "route_id": "H30",
     "vehicle_id": "5842",
     "type": "bus"
   },
   {
-    "latitude": -34.95137,
-    "longitude": 138.55162,
-    "route_id": "168",
-    "vehicle_id": "5847",
+    "latitude": -34.913982,
+    "longitude": 138.52463,
+    "route_id": "286",
+    "vehicle_id": "5843",
     "type": "bus"
   },
   {
-    "latitude": -34.968025,
-    "longitude": 138.55676,
-    "route_id": "100",
+    "latitude": -35.01762,
+    "longitude": 138.54579,
+    "route_id": "241",
+    "vehicle_id": "5844",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.91597,
+    "longitude": 138.57814,
+    "route_id": "150",
     "vehicle_id": "5853",
     "type": "bus"
   },
   {
-    "latitude": -35.01753,
-    "longitude": 138.55205,
-    "route_id": "300G",
-    "vehicle_id": "5857",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.931976,
-    "longitude": 138.57076,
+    "latitude": -34.99121,
+    "longitude": 138.53893,
     "route_id": "248",
     "vehicle_id": "5858",
     "type": "bus"
   },
   {
-    "latitude": -34.94919,
-    "longitude": 138.55377,
-    "route_id": "167C",
-    "vehicle_id": "5860",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.871807,
-    "longitude": 138.6362,
-    "route_id": "273",
+    "latitude": -34.92512,
+    "longitude": 138.61362,
+    "route_id": "H20",
     "vehicle_id": "5862",
     "type": "bus"
   },
   {
-    "latitude": -34.854797,
-    "longitude": 138.64569,
-    "route_id": "208",
-    "vehicle_id": "66",
+    "latitude": -34.778175,
+    "longitude": 138.61531,
+    "route_id": "405",
+    "vehicle_id": "599",
     "type": "bus"
   },
   {
     "latitude": 0.0,
     "longitude": 0.0,
-    "route_id": "502",
+    "route_id": "560",
     "vehicle_id": "807",
     "type": "bus"
   },
   {
-    "latitude": -34.836895,
-    "longitude": 138.63272,
-    "route_id": "202",
+    "latitude": -34.764023,
+    "longitude": 138.63986,
+    "route_id": "482",
     "vehicle_id": "834",
     "type": "bus"
   },
   {
-    "latitude": -34.742798,
-    "longitude": 138.67642,
+    "latitude": -34.80552,
+    "longitude": 138.61642,
     "route_id": "482",
     "vehicle_id": "836",
     "type": "bus"
   },
   {
-    "latitude": -34.863453,
-    "longitude": 138.55663,
-    "route_id": "251",
-    "vehicle_id": "843",
+    "latitude": -34.710384,
+    "longitude": 138.67227,
+    "route_id": "452",
+    "vehicle_id": "842",
     "type": "bus"
   },
   {
-    "latitude": -34.76658,
-    "longitude": 138.64848,
-    "route_id": "225M",
+    "latitude": -34.78527,
+    "longitude": 138.6104,
+    "route_id": "411",
     "vehicle_id": "845",
     "type": "bus"
   },
   {
-    "latitude": -34.886192,
-    "longitude": 138.50409,
-    "route_id": "665",
+    "latitude": -34.875214,
+    "longitude": 138.55193,
+    "route_id": "300",
     "vehicle_id": "848",
     "type": "bus"
   },
   {
-    "latitude": -34.924995,
-    "longitude": 138.61926,
-    "route_id": "142",
-    "vehicle_id": "849",
+    "latitude": -34.717113,
+    "longitude": 138.66496,
+    "route_id": "440",
+    "vehicle_id": "852",
     "type": "bus"
   },
   {
-    "latitude": -34.84511,
-    "longitude": 138.66643,
-    "route_id": "503",
-    "vehicle_id": "850",
+    "latitude": -34.925632,
+    "longitude": 138.59981,
+    "route_id": "222",
+    "vehicle_id": "953",
     "type": "bus"
   },
   {
-    "latitude": -34.88776,
-    "longitude": 138.65749,
-    "route_id": "174",
-    "vehicle_id": "950",
-    "type": "bus"
-  },
-  {
-    "latitude": -34.94177,
-    "longitude": 138.59203,
+    "latitude": -34.92466,
+    "longitude": 138.59306,
     "route_id": "W91",
     "vehicle_id": "954",
     "type": "bus"
   },
   {
-    "latitude": -35.037685,
-    "longitude": 138.5664,
-    "route_id": "320",
+    "latitude": -35.009323,
+    "longitude": 138.5583,
+    "route_id": "601",
+    "vehicle_id": "961",
+    "type": "bus"
+  },
+  {
+    "latitude": -34.996445,
+    "longitude": 138.593,
+    "route_id": "G10",
     "vehicle_id": "963",
     "type": "bus"
   }

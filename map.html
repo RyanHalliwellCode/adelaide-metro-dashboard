@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <title>Adelaide Metro - Vehicle Map</title>
 
-<!-- Leaflet is a lightweight open-source mapping library, loaded from its CDN. -->
+<!-- Leaflet, loaded from its CDN. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
   html, body { height: 100%; margin: 0; font-family: sans-serif; }
 
-  /* Header sits above the map; the map takes whatever height is left over. */
+  /* Header on top, map fills the rest. */
   body { display: flex; flex-direction: column; }
   header {
     background: #1c2b3a;
@@ -30,6 +30,7 @@
     font-size: 14px;
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    min-width: 190px;
   }
   .legend h2 {
     margin: 0 0 6px;
@@ -38,7 +39,7 @@
     letter-spacing: 0.5px;
     color: #555;
   }
-  /* Each row is a clickable label so the colour swatch and count toggle too. */
+  /* Whole row is clickable, not just the checkbox. */
   .legend label {
     display: flex;
     align-items: center;
@@ -66,23 +67,53 @@
     color: #555;
   }
   .legend .total .count { font-weight: 600; }
+
+  .legend .live {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+  }
+  .legend .live label { font-weight: 600; }
+  .legend .status {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+  }
+  .legend .status.error { color: #c0392b; }
+  /* Dot only pulses while updates are actually coming through. */
+  .legend .pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #bbb;
+    margin-left: 6px;
+  }
+  .legend .pulse.on {
+    background: #27ae60;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Adelaide Metro - Live Vehicle Locations</h1>
-  <p>Vehicle positions from the Adelaide Metro GTFS-realtime feed. Use the panel to filter by type.</p>
+  <p>Vehicle positions from the Adelaide Metro GTFS-realtime feed. Use the panel to filter by type, or switch on live mode to track trains in real time.</p>
 </header>
 
 <div id="map"></div>
 
 <script>
-  // Adelaide city centre, used as the initial map view.
+  // Adelaide city centre, where the map starts.
   const ADELAIDE_CENTER = [-34.9285, 138.6007];
 
-  // Colour used per vehicle type, matched to main.py's classify_vehicle().
-  // Order here also drives the order of rows in the filter panel.
+  // Matches classify_vehicle() in main.py. Order sets the panel row order too.
   const TYPE_COLORS = {
     bus: "#1f77b4",
     train: "#d62728",
@@ -90,56 +121,182 @@
     unknown: "#7f7f7f",
   };
 
+  // Just a placeholder - the server tells us the real list on first response.
+  let liveTypes = ["train"];
+
   const map = L.map("map").setView(ADELAIDE_CENTER, 12);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map);
 
-  // One layer group per vehicle type. Filtering is then just adding or
-  // removing a whole group from the map, rather than touching each marker.
+  // A layer per type means filtering is one call, not 400 marker updates.
   const layers = {};
   for (const type of Object.keys(TYPE_COLORS)) {
     layers[type] = L.layerGroup().addTo(map);
   }
 
-  // Static snapshot produced by main.py (python main.py writes vehicles.json).
+  const counts = Object.fromEntries(Object.keys(TYPE_COLORS).map((t) => [t, 0]));
+
+  function normaliseType(type) {
+    // Anything without a colour falls back to unknown.
+    return TYPE_COLORS[type] ? type : "unknown";
+  }
+
+  function addMarker(v) {
+    const type = normaliseType(v.type);
+    const color = TYPE_COLORS[type];
+    L.circleMarker([v.latitude, v.longitude], {
+      radius: 6,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.8,
+    })
+      .bindPopup(
+        `<b>${type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
+      )
+      .addTo(layers[type]);
+  }
+
+  function renderCounts() {
+    let total = 0;
+    for (const [type, n] of Object.entries(counts)) {
+      total += n;
+      const el = document.getElementById(`count-${type}`);
+      if (el) el.textContent = n;
+    }
+    const totalEl = document.getElementById("count-total");
+    if (totalEl) totalEl.textContent = total;
+    document.title = `Adelaide Metro - ${total} vehicles`;
+  }
+
+  // --- First render, from the static snapshot ------------------------------
+
   fetch("vehicles.json")
     .then((response) => response.json())
     .then((vehicles) => {
-      // Every type starts at 0 so a type with no vehicles still shows a row.
-      // Without this, an empty "unknown" would silently vanish from the panel
-      // and you could not tell zero apart from "not rendered".
-      const counts = Object.fromEntries(Object.keys(TYPE_COLORS).map((t) => [t, 0]));
-
       vehicles.forEach((v) => {
-        // Guard against a type main.py might emit that has no colour defined.
-        const type = TYPE_COLORS[v.type] ? v.type : "unknown";
-        counts[type] += 1;
-
-        const color = TYPE_COLORS[type];
-        L.circleMarker([v.latitude, v.longitude], {
-          radius: 6,
-          color: color,
-          fillColor: color,
-          fillOpacity: 0.8,
-        })
-          .bindPopup(
-            `<b>${type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
-          )
-          .addTo(layers[type]);
+        counts[normaliseType(v.type)] += 1;
+        addMarker(v);
       });
-
-      addFilterPanel(counts, vehicles.length);
-      document.title = `Adelaide Metro - ${vehicles.length} vehicles`;
+      addFilterPanel();
+      renderCounts();
     })
     .catch((err) => {
       console.error("Failed to load vehicles.json:", err);
       alert("Could not load vehicles.json. Run 'python main.py' first to generate it.");
     });
 
-  // Legend doubles as the filter: a checkbox per type, with its live count.
-  function addFilterPanel(counts, total) {
+  // --- Live mode -----------------------------------------------------------
+
+  // Countdown is for show, but hitting zero fires the refresh. Each response
+  // resyncs it to the server's next_refresh_in so we don't drift out of step.
+  let liveOn = false;
+  let countdown = 0;
+  let tickTimer = null;
+  let fetching = false;
+
+  function statusEl() {
+    return document.getElementById("live-status");
+  }
+
+  function setStatus(text, isError) {
+    const el = statusEl();
+    if (!el) return;
+    el.textContent = text;
+    el.classList.toggle("error", Boolean(isError));
+  }
+
+  function setPulse(on) {
+    const el = document.getElementById("live-pulse");
+    if (el) el.classList.toggle("on", on);
+  }
+
+  function replaceLiveVehicles(vehicles) {
+    // Only rebuild the live layers - the rest keep their snapshot markers.
+    for (const type of liveTypes) {
+      if (layers[type]) {
+        layers[type].clearLayers();
+        counts[type] = 0;
+      }
+    }
+    vehicles.forEach((v) => {
+      const type = normaliseType(v.type);
+      counts[type] += 1;
+      addMarker(v);
+    });
+    renderCounts();
+  }
+
+  async function refreshLive() {
+    if (fetching) return;
+    fetching = true;
+    try {
+      const response = await fetch("api/vehicles");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      if (Array.isArray(data.live_types) && data.live_types.length) {
+        liveTypes = data.live_types;
+      }
+      replaceLiveVehicles(data.vehicles);
+
+      if (data.error) {
+        // Server's up but its last poll failed, so these positions are old.
+        setStatus(`Feed error, showing last good data: ${data.error}`, true);
+      } else {
+        const age = data.age_seconds === null ? "?" : Math.round(data.age_seconds);
+        setStatus(`${liveTypes.join(", ")} live - ${data.count} vehicles, data ${age}s old`);
+      }
+      setPulse(true);
+
+      // Wait a second past the server's next poll so we don't re-read old data.
+      countdown = Math.max(2, Math.ceil(data.next_refresh_in) + 1);
+    } catch (err) {
+      console.error("Live update failed:", err);
+      setStatus(
+        "Live update failed. Is the server running? (python -m uvicorn server:app --reload)",
+        true
+      );
+      setPulse(false);
+      countdown = 10;
+    } finally {
+      fetching = false;
+    }
+  }
+
+  function tick() {
+    if (!liveOn) return;
+    countdown -= 1;
+    if (countdown <= 0) {
+      refreshLive();
+      return;
+    }
+    const el = document.getElementById("live-countdown");
+    if (el) el.textContent = `Next refresh in ${countdown}s`;
+  }
+
+  function setLiveMode(on) {
+    liveOn = on;
+    clearInterval(tickTimer);
+    tickTimer = null;
+
+    const countdownEl = document.getElementById("live-countdown");
+    if (on) {
+      countdown = 0;
+      refreshLive();
+      tickTimer = setInterval(tick, 1000);
+    } else {
+      setPulse(false);
+      setStatus("Live mode off - showing the vehicles.json snapshot.");
+      if (countdownEl) countdownEl.textContent = "";
+    }
+  }
+
+  // --- Filter panel --------------------------------------------------------
+
+  // Legend doubles as the controls - type filters, counts and live mode.
+  function addFilterPanel() {
     const panel = L.control({ position: "bottomright" });
 
     panel.onAdd = function () {
@@ -154,16 +311,25 @@
                 <input type="checkbox" data-type="${type}" checked>
                 <span class="swatch" style="background:${color}"></span>
                 ${type}
-                <span class="count">${counts[type]}</span>
+                <span class="count" id="count-${type}">0</span>
               </label>`
           )
           .join("") +
-        `<div class="total">Total<span class="count">${total}</span></div>`;
+        `<div class="total">Total<span class="count" id="count-total">0</span></div>
+         <div class="live">
+           <label>
+             <input type="checkbox" id="live-toggle">
+             Live mode
+             <span class="pulse" id="live-pulse"></span>
+           </label>
+           <div class="status" id="live-status">Live mode off - showing the vehicles.json snapshot.</div>
+           <div class="status" id="live-countdown"></div>
+         </div>`;
 
-      // Without this, clicking a checkbox also pans/zooms the map underneath.
+      // Stops checkbox clicks from panning the map underneath.
       L.DomEvent.disableClickPropagation(div);
 
-      div.querySelectorAll("input[type=checkbox]").forEach((box) => {
+      div.querySelectorAll("input[data-type]").forEach((box) => {
         box.addEventListener("change", () => {
           const layer = layers[box.dataset.type];
           if (box.checked) {
@@ -173,6 +339,10 @@
           }
         });
       });
+
+      div
+        .querySelector("#live-toggle")
+        .addEventListener("change", (event) => setLiveMode(event.target.checked));
 
       return div;
     };
