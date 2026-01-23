@@ -98,6 +98,64 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.25; }
   }
+
+  /* Trip panel - sits over the map on the left when you click a vehicle. */
+  #trip {
+    position: absolute;
+    top: 84px;
+    left: 12px;
+    width: 310px;
+    max-height: calc(100% - 180px);
+    display: none;
+    flex-direction: column;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    z-index: 1000;
+    font-size: 13px;
+  }
+  #trip.open { display: flex; }
+  #trip .head {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+    border-left: 5px solid #999;
+    border-radius: 4px 0 0 0;
+  }
+  #trip .route { font-size: 15px; font-weight: 600; }
+  #trip .sub { color: #666; margin-top: 2px; }
+  #trip .meta { color: #888; margin-top: 4px; font-size: 12px; }
+  #trip .close {
+    float: right;
+    cursor: pointer;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+    padding-left: 8px;
+  }
+  #trip .zoom {
+    display: inline-block;
+    margin-top: 6px;
+    color: #1c6cb4;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  #trip .stops { overflow-y: auto; padding: 6px 0; }
+  #trip .stop {
+    display: flex;
+    gap: 10px;
+    padding: 3px 12px;
+    line-height: 1.5;
+  }
+  #trip .stop .t {
+    color: #666;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  /* Stops it has already gone past fade out, the one it's heading for stands out. */
+  #trip .stop.past { opacity: 0.4; }
+  #trip .stop.next { background: #fff5d6; font-weight: 600; }
+  #trip .stop.next .t { color: #333; }
+  #trip .empty { padding: 12px; color: #888; }
 </style>
 </head>
 <body>
@@ -109,6 +167,17 @@
 
 <div id="map"></div>
 
+<div id="trip">
+  <div class="head">
+    <span class="close" id="trip-close">&times;</span>
+    <div class="route" id="trip-route"></div>
+    <div class="sub" id="trip-sub"></div>
+    <div class="meta" id="trip-meta"></div>
+    <span class="zoom" id="trip-zoom">Zoom to route</span>
+  </div>
+  <div class="stops" id="trip-stops"></div>
+</div>
+
 <script>
   // Adelaide city centre, where the map starts.
   const ADELAIDE_CENTER = [-34.9285, 138.6007];
@@ -118,6 +187,7 @@
     bus: "#1f77b4",
     train: "#d62728",
     tram: "#2ca02c",
+    ferry: "#9467bd",
     unknown: "#7f7f7f",
   };
 
@@ -146,16 +216,14 @@
   function addMarker(v) {
     const type = normaliseType(v.type);
     const color = TYPE_COLORS[type];
-    L.circleMarker([v.latitude, v.longitude], {
+    const marker = L.circleMarker([v.latitude, v.longitude], {
       radius: 6,
       color: color,
       fillColor: color,
       fillOpacity: 0.8,
-    })
-      .bindPopup(
-        `<b>${type.toUpperCase()}</b><br>Route: ${v.route_id}<br>Vehicle ID: ${v.vehicle_id}`
-      )
-      .addTo(layers[type]);
+    });
+    marker.on("click", () => showTrip(v));
+    marker.addTo(layers[type]);
   }
 
   function renderCounts() {
@@ -186,6 +254,108 @@
       console.error("Failed to load vehicles.json:", err);
       alert("Could not load vehicles.json. Run 'python main.py' first to generate it.");
     });
+
+  // --- Trip panel ----------------------------------------------------------
+
+  // The line and stop dots for whatever vehicle is currently selected.
+  const tripLayer = L.layerGroup().addTo(map);
+  let tripBounds = null;
+
+  function closeTrip() {
+    document.getElementById("trip").classList.remove("open");
+    tripLayer.clearLayers();
+    tripBounds = null;
+  }
+
+  function drawTripLine(stops, color) {
+    tripLayer.clearLayers();
+    const points = stops
+      .filter((s) => s.latitude !== null && s.longitude !== null)
+      .map((s) => [s.latitude, s.longitude]);
+    if (!points.length) return;
+
+    L.polyline(points, { color: color, weight: 3, opacity: 0.65 }).addTo(tripLayer);
+    points.forEach((p) => {
+      L.circleMarker(p, {
+        radius: 3,
+        color: color,
+        fillColor: "white",
+        fillOpacity: 1,
+        weight: 2,
+      }).addTo(tripLayer);
+    });
+    tripBounds = L.latLngBounds(points);
+  }
+
+  function renderStops(data) {
+    const list = document.getElementById("trip-stops");
+    list.innerHTML = data.stops
+      .map((s, i) => {
+        // next_stop_index is null once the whole trip is in the past.
+        let cls = "stop";
+        if (data.next_stop_index === null || i < data.next_stop_index) cls += " past";
+        else if (i === data.next_stop_index) cls += " next";
+        const time = (s.arrival || s.departure || "").slice(0, 5);
+        return `<div class="${cls}"><span class="t">${time}</span><span>${s.name}</span></div>`;
+      })
+      .join("");
+
+    // Scroll the stop it's heading for into view rather than leaving it buried.
+    const next = list.querySelector(".next");
+    if (next) next.scrollIntoView({ block: "center" });
+  }
+
+  async function showTrip(v) {
+    const panel = document.getElementById("trip");
+    const type = normaliseType(v.type);
+    const color = TYPE_COLORS[type];
+
+    panel.classList.add("open");
+    panel.querySelector(".head").style.borderLeftColor = color;
+    document.getElementById("trip-route").textContent = `${type} ${v.route_id}`;
+    document.getElementById("trip-sub").textContent = "Loading timetable...";
+    document.getElementById("trip-meta").textContent = "";
+    document.getElementById("trip-stops").innerHTML = "";
+
+    if (!v.trip_id) {
+      document.getElementById("trip-sub").textContent = "No trip ID in the feed for this vehicle.";
+      return;
+    }
+
+    try {
+      const response = await fetch(`api/trip/${encodeURIComponent(v.trip_id)}`);
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw new Error(detail.detail || `HTTP ${response.status}`);
+      }
+      const data = await response.json();
+
+      document.getElementById("trip-route").textContent = data.route_name;
+      document.getElementById("trip-sub").textContent = data.headsign
+        ? `Towards ${data.headsign}`
+        : `Route ${data.route_id}`;
+
+      // speed is metres per second in the feed, which means nothing to anyone.
+      const bits = [`Vehicle ${v.vehicle_id}`, `Trip ${data.trip_id}`];
+      if (v.speed !== null && v.speed !== undefined) {
+        bits.push(`${Math.round(v.speed * 3.6)} km/h`);
+      }
+      document.getElementById("trip-meta").textContent = bits.join(" - ");
+
+      renderStops(data);
+      drawTripLine(data.stops, color);
+    } catch (err) {
+      console.error("Trip lookup failed:", err);
+      document.getElementById("trip-sub").textContent = String(err.message || err);
+      document.getElementById("trip-stops").innerHTML =
+        '<div class="empty">Timetable unavailable. Has gtfs.db been built?</div>';
+    }
+  }
+
+  document.getElementById("trip-close").addEventListener("click", closeTrip);
+  document.getElementById("trip-zoom").addEventListener("click", () => {
+    if (tripBounds) map.fitBounds(tripBounds, { padding: [40, 40] });
+  });
 
   // --- Live mode -----------------------------------------------------------
 

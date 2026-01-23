@@ -1,1 +1,5 @@
 __pycache__/
+
+# Rebuildable from the feed - 17 MB zip, ~90 MB database.
+gtfs_static.zip
+gtfs.db

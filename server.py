@@ -13,17 +13,19 @@ then open http://127.0.0.1:8000/
 
 import asyncio
 import re
+import sqlite3
 import time
 from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
 from main import DEBUG_URL, fetch_debug_text, parse_vehicles
 
 BASE_DIR = Path(__file__).parent
+DB_PATH = BASE_DIR / "gtfs.db"
 
 # The feed only republishes every ~15s, so polling faster is wasted bandwidth.
 POLL_INTERVAL_SECONDS = 15
@@ -124,6 +126,64 @@ async def api_vehicles() -> dict:
         "next_refresh_in": round(cache.seconds_until_refresh(), 1),
         "poll_interval": POLL_INTERVAL_SECONDS,
         "error": cache.error,
+    }
+
+
+# Not async on purpose - FastAPI runs sync endpoints in a threadpool, which
+# keeps these blocking sqlite queries off the event loop for free.
+@app.get("/api/trip/{trip_id}")
+def api_trip(trip_id: str) -> dict:
+    if not DB_PATH.exists():
+        raise HTTPException(503, "gtfs.db missing - run 'python gtfs_static.py' first.")
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        trip = conn.execute(
+            """SELECT t.route_id, t.trip_headsign, t.direction_id,
+                      r.route_long_name, r.route_short_name, r.route_type
+               FROM trips t JOIN routes r ON r.route_id = t.route_id
+               WHERE t.trip_id = ?""",
+            (trip_id,),
+        ).fetchone()
+        if not trip:
+            raise HTTPException(404, f"trip {trip_id} is not in the timetable")
+
+        stops = conn.execute(
+            """SELECT st.stop_sequence, st.arrival_time, st.departure_time,
+                      s.stop_name, s.stop_lat, s.stop_lon
+               FROM stop_times st JOIN stops s ON s.stop_id = st.stop_id
+               WHERE st.trip_id = ? ORDER BY CAST(st.stop_sequence AS INTEGER)""",
+            (trip_id,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    # First stop it hasn't reached yet. GTFS writes after-midnight times as
+    # 24:xx, which sort after everything, so a plain string compare is enough.
+    now = datetime.now().strftime("%H:%M:%S")
+    next_index = next((i for i, s in enumerate(stops) if (s[1] or s[2]) > now), None)
+
+    route_id, headsign, direction, long_name, short_name, route_type = trip
+    return {
+        "trip_id": trip_id,
+        "route_id": route_id,
+        "route_name": long_name or short_name or route_id,
+        "headsign": headsign,
+        "direction_id": direction,
+        "route_type": route_type,
+        "next_stop_index": next_index,
+        "now": now,
+        "stops": [
+            {
+                "sequence": seq,
+                "arrival": arrival,
+                "departure": departure,
+                "name": name,
+                "latitude": float(lat) if lat else None,
+                "longitude": float(lon) if lon else None,
+            }
+            for seq, arrival, departure, name, lat, lon in stops
+        ],
     }
 
 

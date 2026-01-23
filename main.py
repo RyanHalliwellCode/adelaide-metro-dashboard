@@ -18,6 +18,10 @@ LAT_RE = re.compile(r"latitude:\s*(-?\d+\.?\d*)")
 LON_RE = re.compile(r"longitude:\s*(-?\d+\.?\d*)")
 ROUTE_ID_RE = re.compile(r'route_id:\s*"([^"]*)"')
 VEHICLE_ID_RE = re.compile(r'vehicle\s*\{\s*id:\s*"([^"]*)"')
+# trip_id is the good one - it joins straight to the timetable in gtfs.db.
+TRIP_ID_RE = re.compile(r'trip_id:\s*"([^"]*)"')
+BEARING_RE = re.compile(r"bearing:\s*(-?\d+\.?\d*)")
+SPEED_RE = re.compile(r"speed:\s*(-?\d+\.?\d*)")
 
 
 def fetch_debug_text(url: str) -> str:
@@ -39,6 +43,9 @@ RAIL_ROUTES = frozenset({
 })
 TRAM_ROUTES = frozenset({"BTANIC", "FESTVL", "GLNELG"})
 
+# The Kangaroo Island ferry. Never shows up live, but it's not a bus either.
+FERRY_ROUTES = frozenset({"SEALNK"})
+
 
 def classify_vehicle(route_id: str) -> str:
     """Map a GTFS route_id to a broad vehicle type for map display."""
@@ -48,6 +55,8 @@ def classify_vehicle(route_id: str) -> str:
         return "train"
     if route_id in TRAM_ROUTES:
         return "tram"
+    if route_id in FERRY_ROUTES:
+        return "ferry"
     return "bus"
 
 
@@ -62,6 +71,9 @@ def parse_vehicles(text: str) -> list[dict]:
         lon_match = LON_RE.search(block)
         route_match = ROUTE_ID_RE.search(block)
         vehicle_id_match = VEHICLE_ID_RE.search(block)
+        trip_match = TRIP_ID_RE.search(block)
+        bearing_match = BEARING_RE.search(block)
+        speed_match = SPEED_RE.search(block)
         route_id = route_match.group(1) if route_match else None
 
         vehicles.append({
@@ -69,6 +81,9 @@ def parse_vehicles(text: str) -> list[dict]:
             "longitude": float(lon_match.group(1)) if lon_match else None,
             "route_id": route_id,
             "vehicle_id": vehicle_id_match.group(1) if vehicle_id_match else None,
+            "trip_id": trip_match.group(1) if trip_match else None,
+            "bearing": float(bearing_match.group(1)) if bearing_match else None,
+            "speed": float(speed_match.group(1)) if speed_match else None,
             "type": classify_vehicle(route_id),
         })
 
