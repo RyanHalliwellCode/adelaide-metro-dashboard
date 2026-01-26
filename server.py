@@ -111,6 +111,23 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Adelaide Metro Dashboard", lifespan=lifespan)
 
 
+@app.get("/api/snapshot")
+async def api_snapshot() -> dict:
+    """
+    Every vehicle type, for the first render. The background poll already has
+    fresh data for all of them, so serving the file on disk here would show
+    positions from whenever main.py last ran - possibly hours ago.
+    """
+    cache: FeedCache = app.state.cache
+    return {
+        "vehicles": cache.vehicles,
+        "count": len(cache.vehicles),
+        "updated_at": cache.updated_at,
+        "age_seconds": round(cache.age_seconds(), 1) if cache.age_seconds() is not None else None,
+        "error": cache.error,
+    }
+
+
 @app.get("/api/vehicles")
 async def api_vehicles() -> dict:
     """Live vehicles plus the timing info the client's countdown runs off."""
@@ -139,7 +156,7 @@ def api_trip(trip_id: str) -> dict:
     conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
     try:
         trip = conn.execute(
-            """SELECT t.route_id, t.trip_headsign, t.direction_id,
+            """SELECT t.route_id, t.trip_headsign, t.direction_id, t.shape_id,
                       r.route_long_name, r.route_short_name, r.route_type
                FROM trips t JOIN routes r ON r.route_id = t.route_id
                WHERE t.trip_id = ?""",
@@ -147,6 +164,14 @@ def api_trip(trip_id: str) -> dict:
         ).fetchone()
         if not trip:
             raise HTTPException(404, f"trip {trip_id} is not in the timetable")
+
+        # The real path. Joining the stops with straight lines instead cuts
+        # every corner and puts trains through paddocks.
+        shape = conn.execute(
+            """SELECT shape_pt_lat, shape_pt_lon FROM shapes WHERE shape_id = ?
+               ORDER BY CAST(shape_pt_sequence AS INTEGER)""",
+            (trip[3],),
+        ).fetchall()
 
         stops = conn.execute(
             """SELECT st.stop_sequence, st.arrival_time, st.departure_time,
@@ -163,7 +188,7 @@ def api_trip(trip_id: str) -> dict:
     now = datetime.now().strftime("%H:%M:%S")
     next_index = next((i for i, s in enumerate(stops) if (s[1] or s[2]) > now), None)
 
-    route_id, headsign, direction, long_name, short_name, route_type = trip
+    route_id, headsign, direction, _shape_id, long_name, short_name, route_type = trip
     return {
         "trip_id": trip_id,
         "route_id": route_id,
@@ -173,6 +198,7 @@ def api_trip(trip_id: str) -> dict:
         "route_type": route_type,
         "next_stop_index": next_index,
         "now": now,
+        "shape": [[float(lat), float(lon)] for lat, lon in shape],
         "stops": [
             {
                 "sequence": seq,

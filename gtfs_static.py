@@ -15,8 +15,9 @@ STATIC_URL = "https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.
 ZIP_PATH = Path("gtfs_static.zip")
 DB_PATH = Path("gtfs.db")
 
-# 39 MB of route geometry we don't draw yet. Delete this to load it.
-SKIP_FILES = {"shapes.txt"}
+# Nothing skipped now - shapes.txt is big but it's the only thing that knows
+# where the tracks actually go. Straight lines between stops cut every corner.
+SKIP_FILES = set()
 
 # route_type codes -> our names. 700s are just more buses, 4 is the ferry.
 ROUTE_TYPES = {
@@ -37,6 +38,8 @@ INDEXES = [
     ("stop_times", "trip_id"),
     ("stop_times", "stop_id"),
     ("routes", "route_type"),
+    ("shapes", "shape_id"),
+    ("trips", "shape_id"),
 ]
 
 

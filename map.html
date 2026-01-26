@@ -155,6 +155,11 @@
   #trip .stop.past { opacity: 0.4; }
   #trip .stop.next { background: #fff5d6; font-weight: 600; }
   #trip .stop.next .t { color: #333; }
+  /* Where the vehicle is sitting right now, as opposed to where it's headed. */
+  #trip .stop.at { background: #dff0d8; font-weight: 600; }
+  #trip .stop.at .t { color: #333; }
+  #trip .tag { color: #b07000; font-weight: 400; font-size: 12px; white-space: nowrap; }
+  #trip .tag.at { color: #3c763d; }
   #trip .empty { padding: 12px; color: #888; }
 </style>
 </head>
@@ -238,22 +243,54 @@
     document.title = `Adelaide Metro - ${total} vehicles`;
   }
 
-  // --- First render, from the static snapshot ------------------------------
+  // --- First render --------------------------------------------------------
 
-  fetch("vehicles.json")
-    .then((response) => response.json())
-    .then((vehicles) => {
-      vehicles.forEach((v) => {
-        counts[normaliseType(v.type)] += 1;
-        addMarker(v);
-      });
-      addFilterPanel();
-      renderCounts();
-    })
-    .catch((err) => {
-      console.error("Failed to load vehicles.json:", err);
-      alert("Could not load vehicles.json. Run 'python main.py' first to generate it.");
+  function drawAll(vehicles) {
+    Object.keys(counts).forEach((t) => (counts[t] = 0));
+    Object.values(layers).forEach((layer) => layer.clearLayers());
+    vehicles.forEach((v) => {
+      counts[normaliseType(v.type)] += 1;
+      addMarker(v);
     });
+    renderCounts();
+  }
+
+  // Ask the server for a live snapshot rather than reading vehicles.json off
+  // disk. That file is only as fresh as the last 'python main.py', and drawing
+  // hours-old positions next to timetable times worked out from the clock right
+  // now puts trains nowhere near where the panel claims they should be.
+  async function firstRender(attempt = 0) {
+    try {
+      const response = await fetch("api/snapshot");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      // The server polls on startup, so an empty result just means we beat it.
+      if (!data.vehicles.length && attempt < 6) {
+        setStatus("Waiting for the first feed poll...");
+        setTimeout(() => firstRender(attempt + 1), 700);
+        return;
+      }
+
+      drawAll(data.vehicles);
+      const age = Math.round(data.age_seconds || 0);
+      setStatus(`Live mode off - showing all types, ${age}s old. Tick for live trains.`);
+    } catch (err) {
+      console.error("Snapshot failed, falling back to vehicles.json:", err);
+      try {
+        const stale = await (await fetch("vehicles.json")).json();
+        drawAll(stale);
+        setStatus("Server unreachable - showing vehicles.json, which may be hours old.", true);
+      } catch (fallbackErr) {
+        console.error("vehicles.json failed too:", fallbackErr);
+        setStatus("No vehicle data. Start the server: python -m uvicorn server:app", true);
+      }
+    }
+  }
+
+  // Panel goes up first so there is somewhere to report progress and errors.
+  addFilterPanel();
+  firstRender();
 
   // --- Trip panel ----------------------------------------------------------
 
@@ -267,42 +304,118 @@
     tripBounds = null;
   }
 
-  function drawTripLine(stops, color) {
+  function drawTripLine(data, color) {
     tripLayer.clearLayers();
-    const points = stops
+
+    const stopPoints = data.stops
       .filter((s) => s.latitude !== null && s.longitude !== null)
       .map((s) => [s.latitude, s.longitude]);
-    if (!points.length) return;
 
-    L.polyline(points, { color: color, weight: 3, opacity: 0.65 }).addTo(tripLayer);
-    points.forEach((p) => {
+    // shape is the surveyed path. Only fall back to joining the stops if a
+    // trip somehow has no geometry, and it will look like it cuts corners.
+    const path = data.shape && data.shape.length ? data.shape : stopPoints;
+    if (!path.length) return;
+
+    // White casing underneath so the line stays readable over dark map detail.
+    L.polyline(path, { color: "white", weight: 7, opacity: 0.9 }).addTo(tripLayer);
+    L.polyline(path, { color: color, weight: 4, opacity: 0.95 }).addTo(tripLayer);
+
+    stopPoints.forEach((p) => {
       L.circleMarker(p, {
-        radius: 3,
+        radius: 4,
         color: color,
         fillColor: "white",
         fillOpacity: 1,
         weight: 2,
       }).addTo(tripLayer);
     });
-    tripBounds = L.latLngBounds(points);
+    tripBounds = L.latLngBounds(path);
   }
 
-  function renderStops(data) {
+  // Close enough for "is it sitting at this stop". Platforms are long and GPS
+  // wanders, so anything tighter than this misses trains actually at a station.
+  const AT_STOP_METRES = 120;
+
+  // Rough metres between two points. Fine over these distances.
+  function metresBetween(a, b) {
+    const dy = (a[0] - b[0]) * 111320;
+    const dx = (a[1] - b[1]) * 111320 * Math.cos((a[0] * Math.PI) / 180);
+    return Math.hypot(dx, dy);
+  }
+
+  // Which stop the vehicle is parked at right now, if any.
+  function currentStopIndex(data, v) {
+    if (v.latitude === null || v.latitude === undefined) return null;
+    let best = null;
+    let bestDistance = AT_STOP_METRES;
+    data.stops.forEach((s, i) => {
+      if (s.latitude === null) return;
+      const d = metresBetween([v.latitude, v.longitude], [s.latitude, s.longitude]);
+      if (d < bestDistance) {
+        bestDistance = d;
+        best = i;
+      }
+    });
+    return best;
+  }
+
+  // "15:47:00" -> "3:47 pm". GTFS writes after-midnight times as 24:xx and
+  // 25:xx, so wrap the hour before working out am/pm.
+  function formatTime(value) {
+    if (!value) return "";
+    const [hours, minutes] = value.split(":").map(Number);
+    const hour24 = hours % 24;
+    const suffix = hour24 < 12 ? "am" : "pm";
+    const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
+    return `${hour12}:${String(minutes).padStart(2, "0")} ${suffix}`;
+  }
+
+  function renderStops(data, v) {
     const list = document.getElementById("trip-stops");
+    const atIndex = currentStopIndex(data, v);
+
+    // A vehicle waiting at a stop is often still "due" there, so the timetable
+    // calls it the next stop too. Point at the one after, or the panel never
+    // says where it's actually heading.
+    const scheduledNext = data.next_stop_index;
+    let nextIndex = scheduledNext;
+    if (atIndex !== null && nextIndex === atIndex) {
+      nextIndex = atIndex + 1 < data.stops.length ? atIndex + 1 : null;
+    }
+
     list.innerHTML = data.stops
       .map((s, i) => {
-        // next_stop_index is null once the whole trip is in the past.
         let cls = "stop";
-        if (data.next_stop_index === null || i < data.next_stop_index) cls += " past";
-        else if (i === data.next_stop_index) cls += " next";
-        const time = (s.arrival || s.departure || "").slice(0, 5);
-        return `<div class="${cls}"><span class="t">${time}</span><span>${s.name}</span></div>`;
+        let tag = "";
+        if (i === atIndex) {
+          cls += " at";
+          tag = ' <span class="tag at">(at this stop)</span>';
+        } else if (i === nextIndex) {
+          cls += " next";
+          tag = ' <span class="tag">(next stop)</span>';
+        } else if (scheduledNext === null || i < scheduledNext) {
+          // next_stop_index is null once the whole trip is in the past.
+          cls += " past";
+        }
+        const time = formatTime(s.arrival || s.departure);
+        return `<div class="${cls}"><span class="t">${time}</span><span>${s.name}${tag}</span></div>`;
       })
       .join("");
 
-    // Scroll the stop it's heading for into view rather than leaving it buried.
-    const next = list.querySelector(".next");
-    if (next) next.scrollIntoView({ block: "center" });
+    // A trip whose stops are all in the past just renders as a grey list with
+    // nothing marked, which reads like a bug. Say so instead.
+    if (scheduledNext === null && data.stops.length) {
+      const last = data.stops[data.stops.length - 1];
+      const note = document.createElement("div");
+      note.className = "empty";
+      note.textContent = `This trip finished at ${formatTime(last.arrival || last.departure)}.`;
+      list.prepend(note);
+    }
+
+    // Scroll to where the vehicle actually is, falling back to where it's going.
+    const focus = list.querySelector(".at") || list.querySelector(".next");
+    if (focus) focus.scrollIntoView({ block: "center" });
+    return atIndex;
   }
 
   async function showTrip(v) {
@@ -335,15 +448,16 @@
         ? `Towards ${data.headsign}`
         : `Route ${data.route_id}`;
 
+      const atIndex = renderStops(data, v);
+      drawTripLine(data, color);
+
       // speed is metres per second in the feed, which means nothing to anyone.
-      const bits = [`Vehicle ${v.vehicle_id}`, `Trip ${data.trip_id}`];
+      const bits = [`Vehicle ${v.vehicle_id}`];
       if (v.speed !== null && v.speed !== undefined) {
         bits.push(`${Math.round(v.speed * 3.6)} km/h`);
       }
+      bits.push(atIndex !== null ? `At ${data.stops[atIndex].name}` : "Between stops");
       document.getElementById("trip-meta").textContent = bits.join(" - ");
-
-      renderStops(data);
-      drawTripLine(data.stops, color);
     } catch (err) {
       console.error("Trip lookup failed:", err);
       document.getElementById("trip-sub").textContent = String(err.message || err);
@@ -458,7 +572,7 @@
       tickTimer = setInterval(tick, 1000);
     } else {
       setPulse(false);
-      setStatus("Live mode off - showing the vehicles.json snapshot.");
+      setStatus("Live mode off - positions frozen at their last update.");
       if (countdownEl) countdownEl.textContent = "";
     }
   }
@@ -492,7 +606,7 @@
              Live mode
              <span class="pulse" id="live-pulse"></span>
            </label>
-           <div class="status" id="live-status">Live mode off - showing the vehicles.json snapshot.</div>
+           <div class="status" id="live-status">Loading...</div>
            <div class="status" id="live-countdown"></div>
          </div>`;
 
