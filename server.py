@@ -30,8 +30,14 @@ DB_PATH = BASE_DIR / "gtfs.db"
 # The feed only republishes every ~15s, so polling faster is wasted bandwidth.
 POLL_INTERVAL_SECONDS = 15
 
-# Trains only for now - add "tram" and "bus" here to go network-wide.
-LIVE_TYPES = ("train",)
+# The whole network. Ferry is in here for completeness - SEALNK has never
+# actually turned up in the realtime feed, so that layer stays empty.
+LIVE_TYPES = ("train", "tram", "bus", "ferry")
+
+# Stop hammering the feed when nobody's watching. Every 15s round the clock is
+# ~5,700 requests and well over a gigabyte a day, almost all of it for an empty
+# room. Polling resumes the moment a page asks for data again.
+IDLE_AFTER_SECONDS = 90
 
 # Tells us how old the data is, not just when we last asked for it.
 HEADER_TIMESTAMP_RE = re.compile(r"timestamp:\s*(\d+)")
@@ -54,6 +60,14 @@ class FeedCache:
         # Monotonic so the countdown doesn't jump if the system clock changes.
         self.fetched_at: float | None = None
         self.error: str | None = None
+        # Starts "active" so the first poll runs before anyone opens the page.
+        self.last_request_at: float = time.monotonic()
+
+    def touch(self) -> None:
+        self.last_request_at = time.monotonic()
+
+    def has_listeners(self) -> bool:
+        return (time.monotonic() - self.last_request_at) < IDLE_AFTER_SECONDS
 
     def store(self, vehicles: list[dict], feed_timestamp: int | None) -> None:
         self.vehicles = vehicles
@@ -76,20 +90,34 @@ class FeedCache:
 
 async def poll_feed(cache: FeedCache) -> None:
     """Refresh the cache forever, one fetch per POLL_INTERVAL_SECONDS."""
+    idle_logged = False
     while True:
         started = time.monotonic()
+
+        # flush because stdout is block-buffered when piped to a file, and a
+        # server log that only appears 8 KB at a time is no use for watching.
+        if not cache.has_listeners():
+            if not idle_logged:
+                print("No clients - pausing feed polling until someone asks.", flush=True)
+                idle_logged = True
+            await asyncio.sleep(1)
+            continue
+        if idle_logged:
+            print("Client back - resuming feed polling.", flush=True)
+            idle_logged = False
+
         try:
             # urllib blocks, so run it off the event loop or requests stall.
             text = await asyncio.to_thread(fetch_debug_text, DEBUG_URL)
             vehicles = parse_vehicles(text)
             cache.store(vehicles, parse_feed_timestamp(text))
-            print(f"Polled feed: {len(vehicles)} vehicles at {cache.updated_at}")
+            print(f"Polled feed: {len(vehicles)} vehicles at {cache.updated_at}", flush=True)
         except asyncio.CancelledError:
             raise
         except Exception as exc:
             # Keep the old snapshot - stale positions beat a blank map.
             cache.error = f"{type(exc).__name__}: {exc}"
-            print(f"Feed poll failed: {cache.error}")
+            print(f"Feed poll failed: {cache.error}", flush=True)
 
         # Subtract the fetch time so the cycle stays on a steady 15s beat.
         await asyncio.sleep(max(1.0, POLL_INTERVAL_SECONDS - (time.monotonic() - started)))
@@ -111,6 +139,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Adelaide Metro Dashboard", lifespan=lifespan)
 
 
+async def wait_for_fresh(cache: FeedCache, timeout: float = 8.0) -> None:
+    """
+    Hold a request until the poller has caught up. After an idle pause the
+    cache can be hours old, and serving that is exactly the bug where a vehicle
+    is drawn where it used to be while its timetable is read off the clock now.
+    """
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        age = cache.age_seconds()
+        if age is not None and age <= POLL_INTERVAL_SECONDS:
+            return
+        await asyncio.sleep(0.25)
+
+
 @app.get("/api/snapshot")
 async def api_snapshot() -> dict:
     """
@@ -119,6 +161,8 @@ async def api_snapshot() -> dict:
     positions from whenever main.py last ran - possibly hours ago.
     """
     cache: FeedCache = app.state.cache
+    cache.touch()
+    await wait_for_fresh(cache)
     return {
         "vehicles": cache.vehicles,
         "count": len(cache.vehicles),
@@ -132,6 +176,8 @@ async def api_snapshot() -> dict:
 async def api_vehicles() -> dict:
     """Live vehicles plus the timing info the client's countdown runs off."""
     cache: FeedCache = app.state.cache
+    cache.touch()
+    await wait_for_fresh(cache)
     live = [v for v in cache.vehicles if v["type"] in LIVE_TYPES]
     return {
         "live_types": list(LIVE_TYPES),

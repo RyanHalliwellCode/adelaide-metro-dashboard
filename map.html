@@ -218,6 +218,15 @@
     return TYPE_COLORS[type] ? type : "unknown";
   }
 
+  // vehicle id -> its marker, so a refresh can move markers instead of
+  // rebuilding them. Rebuilding ~600 of them every cycle flickers badly and
+  // throws away whatever you had selected.
+  const markers = new Map();
+
+  function markerKey(v) {
+    return v.vehicle_id || v.trip_id;
+  }
+
   function addMarker(v) {
     const type = normaliseType(v.type);
     const color = TYPE_COLORS[type];
@@ -227,8 +236,14 @@
       fillColor: color,
       fillOpacity: 0.8,
     });
-    marker.on("click", () => showTrip(v));
+    // Reads entry.vehicle, not v, so a click always uses the latest position.
+    const entry = { marker, type, vehicle: v };
+    marker.on("click", () => showTrip(entry.vehicle));
     marker.addTo(layers[type]);
+
+    const key = markerKey(v);
+    if (key) markers.set(key, entry);
+    return entry;
   }
 
   function renderCounts() {
@@ -248,6 +263,7 @@
   function drawAll(vehicles) {
     Object.keys(counts).forEach((t) => (counts[t] = 0));
     Object.values(layers).forEach((layer) => layer.clearLayers());
+    markers.clear();
     vehicles.forEach((v) => {
       counts[normaliseType(v.type)] += 1;
       addMarker(v);
@@ -274,7 +290,7 @@
 
       drawAll(data.vehicles);
       const age = Math.round(data.age_seconds || 0);
-      setStatus(`Live mode off - showing all types, ${age}s old. Tick for live trains.`);
+      setStatus(`Live mode off - ${data.count} vehicles, ${age}s old. Tick for live updates.`);
     } catch (err) {
       console.error("Snapshot failed, falling back to vehicles.json:", err);
       try {
@@ -297,11 +313,13 @@
   // The line and stop dots for whatever vehicle is currently selected.
   const tripLayer = L.layerGroup().addTo(map);
   let tripBounds = null;
+  let selectedKey = null;
 
   function closeTrip() {
     document.getElementById("trip").classList.remove("open");
     tripLayer.clearLayers();
     tripBounds = null;
+    selectedKey = null;
   }
 
   function drawTripLine(data, color) {
@@ -343,6 +361,46 @@
     return Math.hypot(dx, dy);
   }
 
+  // Closest point on the segment a->b to p, in metres, plus how far along that
+  // segment it lands (0 = at a, 1 = at b).
+  function projectOnSegment(p, a, b) {
+    const scale = Math.cos((p[0] * Math.PI) / 180);
+    const ax = (a[1] - p[1]) * 111320 * scale;
+    const ay = (a[0] - p[0]) * 111320;
+    const bx = (b[1] - p[1]) * 111320 * scale;
+    const by = (b[0] - p[0]) * 111320;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const lengthSq = dx * dx + dy * dy;
+    if (!lengthSq) return { distance: Math.hypot(ax, ay), t: 0 };
+    const t = Math.max(0, Math.min(1, -(ax * dx + ay * dy) / lengthSq));
+    return { distance: Math.hypot(ax + t * dx, ay + t * dy), t };
+  }
+
+  // The stop a vehicle is heading for, worked out from where it actually is.
+  // Going by the clock instead breaks the moment a vehicle runs late: the
+  // timetable says it should be five stops further on, so those five get greyed
+  // out as "past" when it hasn't been anywhere near them.
+  function nextStopByPosition(data, v) {
+    if (v.latitude === null || v.latitude === undefined) return null;
+    const pos = [v.latitude, v.longitude];
+    let best = null;
+    let bestDistance = Infinity;
+
+    for (let i = 0; i < data.stops.length - 1; i++) {
+      const a = data.stops[i];
+      const b = data.stops[i + 1];
+      if (a.latitude === null || b.latitude === null) continue;
+      const hit = projectOnSegment(pos, [a.latitude, a.longitude], [b.latitude, b.longitude]);
+      if (hit.distance < bestDistance) {
+        bestDistance = hit.distance;
+        // t of 0 means it hasn't started this leg, so a is still ahead of it.
+        best = hit.t > 0 ? i + 1 : i;
+      }
+    }
+    return best;
+  }
+
   // Which stop the vehicle is parked at right now, if any.
   function currentStopIndex(data, v) {
     if (v.latitude === null || v.latitude === undefined) return null;
@@ -359,6 +417,25 @@
     return best;
   }
 
+  function toSeconds(value) {
+    if (!value) return null;
+    const [h, m, s] = value.split(":").map(Number);
+    return h * 3600 + m * 60 + (s || 0);
+  }
+
+  // How late the vehicle is, from when it's due at the stop it's heading for.
+  // Returns null near midnight, where the 24:xx times make the sums nonsense.
+  function delayMinutes(data, nextIndex) {
+    if (nextIndex === null || !data.stops[nextIndex]) return null;
+    const stop = data.stops[nextIndex];
+    const due = toSeconds(stop.arrival || stop.departure);
+    const now = toSeconds(data.now);
+    if (due === null || now === null) return null;
+    const diff = now - due;
+    if (Math.abs(diff) > 3 * 3600) return null;
+    return Math.round(diff / 60);
+  }
+
   // "15:47:00" -> "3:47 pm". GTFS writes after-midnight times as 24:xx and
   // 25:xx, so wrap the hour before working out am/pm.
   function formatTime(value) {
@@ -370,17 +447,22 @@
     return `${hour12}:${String(minutes).padStart(2, "0")} ${suffix}`;
   }
 
-  function renderStops(data, v) {
+  function renderStops(data, v, autoScroll) {
     const list = document.getElementById("trip-stops");
     const atIndex = currentStopIndex(data, v);
-
-    // A vehicle waiting at a stop is often still "due" there, so the timetable
-    // calls it the next stop too. Point at the one after, or the panel never
-    // says where it's actually heading.
+    const byPosition = nextStopByPosition(data, v);
     const scheduledNext = data.next_stop_index;
-    let nextIndex = scheduledNext;
-    if (atIndex !== null && nextIndex === atIndex) {
+
+    // Position wins over the timetable. Sitting at a stop means the one after
+    // it is next, even though the timetable still has this one as "due".
+    let nextIndex;
+    if (atIndex !== null) {
       nextIndex = atIndex + 1 < data.stops.length ? atIndex + 1 : null;
+    } else if (byPosition !== null) {
+      nextIndex = byPosition;
+    } else {
+      // No coordinates to go on, so the clock is all we have.
+      nextIndex = scheduledNext;
     }
 
     list.innerHTML = data.stops
@@ -393,8 +475,8 @@
         } else if (i === nextIndex) {
           cls += " next";
           tag = ' <span class="tag">(next stop)</span>';
-        } else if (scheduledNext === null || i < scheduledNext) {
-          // next_stop_index is null once the whole trip is in the past.
+        } else if (nextIndex === null || i < nextIndex) {
+          // Everything behind the vehicle, or the whole trip once it's over.
           cls += " past";
         }
         const time = formatTime(s.arrival || s.departure);
@@ -402,33 +484,40 @@
       })
       .join("");
 
-    // A trip whose stops are all in the past just renders as a grey list with
-    // nothing marked, which reads like a bug. Say so instead.
-    if (scheduledNext === null && data.stops.length) {
+    // Nothing marked at all renders as a wall of grey, which reads like a bug.
+    if (nextIndex === null && data.stops.length) {
       const last = data.stops[data.stops.length - 1];
       const note = document.createElement("div");
       note.className = "empty";
-      note.textContent = `This trip finished at ${formatTime(last.arrival || last.departure)}.`;
+      note.textContent = `End of the line - due ${formatTime(last.arrival || last.departure)}.`;
       list.prepend(note);
     }
 
-    // Scroll to where the vehicle actually is, falling back to where it's going.
-    const focus = list.querySelector(".at") || list.querySelector(".next");
-    if (focus) focus.scrollIntoView({ block: "center" });
-    return atIndex;
+    // Only on opening. Doing it on every live refresh would yank the list back
+    // every 15 seconds while you were trying to read further down it.
+    if (autoScroll) {
+      const focus = list.querySelector(".at") || list.querySelector(".next");
+      if (focus) focus.scrollIntoView({ block: "center" });
+    }
+    return { atIndex: atIndex, nextIndex: nextIndex };
   }
 
-  async function showTrip(v) {
+  // quiet = a live refresh redrawing the panel that's already open, so skip the
+  // loading state that would otherwise flash every 15 seconds.
+  async function showTrip(v, quiet) {
     const panel = document.getElementById("trip");
     const type = normaliseType(v.type);
     const color = TYPE_COLORS[type];
+    selectedKey = markerKey(v);
 
     panel.classList.add("open");
     panel.querySelector(".head").style.borderLeftColor = color;
-    document.getElementById("trip-route").textContent = `${type} ${v.route_id}`;
-    document.getElementById("trip-sub").textContent = "Loading timetable...";
-    document.getElementById("trip-meta").textContent = "";
-    document.getElementById("trip-stops").innerHTML = "";
+    if (!quiet) {
+      document.getElementById("trip-route").textContent = `${type} ${v.route_id}`;
+      document.getElementById("trip-sub").textContent = "Loading timetable...";
+      document.getElementById("trip-meta").textContent = "";
+      document.getElementById("trip-stops").innerHTML = "";
+    }
 
     if (!v.trip_id) {
       document.getElementById("trip-sub").textContent = "No trip ID in the feed for this vehicle.";
@@ -448,7 +537,7 @@
         ? `Towards ${data.headsign}`
         : `Route ${data.route_id}`;
 
-      const atIndex = renderStops(data, v);
+      const { atIndex, nextIndex } = renderStops(data, v, !quiet);
       drawTripLine(data, color);
 
       // speed is metres per second in the feed, which means nothing to anyone.
@@ -457,6 +546,13 @@
         bits.push(`${Math.round(v.speed * 3.6)} km/h`);
       }
       bits.push(atIndex !== null ? `At ${data.stops[atIndex].name}` : "Between stops");
+
+      const late = delayMinutes(data, nextIndex);
+      if (late !== null) {
+        if (late >= 2) bits.push(`${late} min late`);
+        else if (late <= -2) bits.push(`${Math.abs(late)} min early`);
+        else bits.push("on time");
+      }
       document.getElementById("trip-meta").textContent = bits.join(" - ");
     } catch (err) {
       console.error("Trip lookup failed:", err);
@@ -497,19 +593,48 @@
   }
 
   function replaceLiveVehicles(vehicles) {
-    // Only rebuild the live layers - the rest keep their snapshot markers.
-    for (const type of liveTypes) {
-      if (layers[type]) {
-        layers[type].clearLayers();
-        counts[type] = 0;
-      }
-    }
+    const live = new Set(liveTypes);
+    const seen = new Set();
+
     vehicles.forEach((v) => {
       const type = normaliseType(v.type);
-      counts[type] += 1;
-      addMarker(v);
+      const key = markerKey(v);
+      seen.add(key);
+
+      const entry = key ? markers.get(key) : null;
+      if (entry && entry.type === type) {
+        entry.marker.setLatLng([v.latitude, v.longitude]);
+        entry.vehicle = v;
+      } else {
+        // New vehicle, or one that changed type because its route changed.
+        if (entry) {
+          layers[entry.type].removeLayer(entry.marker);
+          markers.delete(key);
+        }
+        addMarker(v);
+      }
+    });
+
+    // Gone from the feed - trip finished, or out of service. Only touch the
+    // types live mode owns, so any static layer keeps its markers.
+    for (const [key, entry] of Array.from(markers)) {
+      if (live.has(entry.type) && !seen.has(key)) {
+        layers[entry.type].removeLayer(entry.marker);
+        markers.delete(key);
+      }
+    }
+
+    liveTypes.forEach((t) => (counts[t] = 0));
+    vehicles.forEach((v) => {
+      const type = normaliseType(v.type);
+      if (live.has(type)) counts[type] += 1;
     });
     renderCounts();
+
+    // Keep an open trip panel in step with the vehicle it's describing.
+    if (selectedKey && markers.has(selectedKey)) {
+      showTrip(markers.get(selectedKey).vehicle, true);
+    }
   }
 
   async function refreshLive() {
@@ -530,7 +655,9 @@
         setStatus(`Feed error, showing last good data: ${data.error}`, true);
       } else {
         const age = data.age_seconds === null ? "?" : Math.round(data.age_seconds);
-        setStatus(`${liveTypes.join(", ")} live - ${data.count} vehicles, data ${age}s old`);
+        // "train, tram, bus, ferry live" is a mouthful once everything is on.
+        const label = liveTypes.length >= 4 ? "All types" : liveTypes.join(", ");
+        setStatus(`${label} live - ${data.count} vehicles, data ${age}s old`);
       }
       setPulse(true);
 
