@@ -12,6 +12,7 @@ then open http://127.0.0.1:8000/
 """
 
 import asyncio
+import math
 import re
 import sqlite3
 import time
@@ -256,6 +257,205 @@ def api_trip(trip_id: str) -> dict:
             }
             for seq, arrival, departure, name, lat, lon in stops
         ],
+    }
+
+
+GTFS_TYPE_NAMES = {"0": "tram", "2": "train", "3": "bus", "4": "ferry"}
+
+
+def gtfs_type_name(route_type: str) -> str:
+    # Anything unrecognised is a bus variant - 700, 701, 712 and friends.
+    return GTFS_TYPE_NAMES.get(route_type, "bus")
+
+
+def metres_between(a: tuple, b: tuple) -> float:
+    dy = (a[0] - b[0]) * 111320
+    dx = (a[1] - b[1]) * 111320 * math.cos(math.radians(a[0]))
+    return math.hypot(dx, dy)
+
+
+def progress_along(stops: list, position: tuple) -> int:
+    """
+    Which stop index the vehicle is heading for, by projecting it onto each
+    stop-to-stop leg. Same approach as the trip panel - going by the clock
+    instead is wrong the moment a vehicle runs late.
+    """
+    best = 0
+    best_distance = float("inf")
+    for i in range(len(stops) - 1):
+        ay, ax = stops[i][1], stops[i][2]
+        by, bx = stops[i + 1][1], stops[i + 1][2]
+        scale = math.cos(math.radians(position[0]))
+        pax, pay = (ax - position[1]) * 111320 * scale, (ay - position[0]) * 111320
+        pbx, pby = (bx - position[1]) * 111320 * scale, (by - position[0]) * 111320
+        dx, dy = pbx - pax, pby - pay
+        length_sq = dx * dx + dy * dy
+        if not length_sq:
+            continue
+        t = max(0.0, min(1.0, -(pax * dx + pay * dy) / length_sq))
+        distance = math.hypot(pax + t * dx, pay + t * dy)
+        if distance < best_distance:
+            best_distance = distance
+            best = i + 1 if t > 0 else i
+    return best
+
+
+@app.get("/api/stops")
+def api_stops(south: float, west: float, north: float, east: float, limit: int = 400) -> dict:
+    """Stops inside the current map view. All 9,167 at once is unusable."""
+    if not DB_PATH.exists():
+        raise HTTPException(503, "gtfs.db missing - run 'python gtfs_static.py' first.")
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        rows = conn.execute(
+            """SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon FROM stops
+               WHERE CAST(stop_lat AS REAL) BETWEEN ? AND ?
+                 AND CAST(stop_lon AS REAL) BETWEEN ? AND ?
+               LIMIT ?""",
+            (south, north, west, east, limit + 1),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    truncated = len(rows) > limit
+    return {
+        "stops": [
+            {"stop_id": sid, "code": code, "name": name, "latitude": float(lat), "longitude": float(lon)}
+            for sid, code, name, lat, lon in rows[:limit]
+        ],
+        "truncated": truncated,
+    }
+
+
+@app.get("/api/stop/{stop_id}")
+def api_stop(stop_id: str) -> dict:
+    """Everything about one stop: the routes that serve it, and what's coming."""
+    if not DB_PATH.exists():
+        raise HTTPException(503, "gtfs.db missing - run 'python gtfs_static.py' first.")
+
+    cache: FeedCache = app.state.cache
+    cache.touch()
+
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    try:
+        stop = conn.execute(
+            "SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon FROM stops WHERE stop_id = ?",
+            (stop_id,),
+        ).fetchone()
+        if not stop:
+            raise HTTPException(404, f"stop {stop_id} not found")
+        target = (float(stop[3]), float(stop[4]))
+
+        # Trip count matters here: a stop can list a route that only calls once
+        # a day. Adelaide's school services (route_type 712) do exactly that,
+        # which is why this list is longer than the one Google shows.
+        routes = conn.execute(
+            """SELECT r.route_id, r.route_long_name, r.route_short_name, r.route_type,
+                      COUNT(DISTINCT t.trip_id) AS trips
+               FROM stop_times st
+               JOIN trips t ON t.trip_id = st.trip_id
+               JOIN routes r ON r.route_id = t.route_id
+               WHERE st.stop_id = ?
+               GROUP BY r.route_id
+               ORDER BY trips DESC, r.route_id""",
+            (stop_id,),
+        ).fetchall()
+
+        # Which live vehicles are on a trip that calls here.
+        by_trip = {v["trip_id"]: v for v in cache.vehicles if v.get("trip_id")}
+        approaching = []
+        if by_trip:
+            trip_ids = list(by_trip)
+            marks = ",".join("?" * len(trip_ids))
+            calls = conn.execute(
+                f"""SELECT st.trip_id, st.stop_sequence, st.arrival_time, st.departure_time
+                    FROM stop_times st
+                    WHERE st.stop_id = ? AND st.trip_id IN ({marks})""",
+                (stop_id, *trip_ids),
+            ).fetchall()
+
+            if calls:
+                calling_ids = [c[0] for c in calls]
+                marks = ",".join("?" * len(calling_ids))
+                rows = conn.execute(
+                    f"""SELECT st.trip_id, st.stop_sequence, s.stop_lat, s.stop_lon
+                        FROM stop_times st JOIN stops s ON s.stop_id = st.stop_id
+                        WHERE st.trip_id IN ({marks})""",
+                    calling_ids,
+                ).fetchall()
+
+                sequences: dict[str, list] = {}
+                for trip_id, seq, lat, lon in rows:
+                    sequences.setdefault(trip_id, []).append((int(seq), float(lat), float(lon)))
+                for legs in sequences.values():
+                    legs.sort()
+
+                headsigns = dict(
+                    conn.execute(
+                        f"""SELECT t.trip_id, t.trip_headsign FROM trips t
+                            WHERE t.trip_id IN ({marks})""",
+                        calling_ids,
+                    ).fetchall()
+                )
+
+                for trip_id, seq, arrival, departure in calls:
+                    vehicle = by_trip[trip_id]
+                    legs = sequences.get(trip_id) or []
+                    if not legs or vehicle["latitude"] is None:
+                        continue
+                    target_index = next(
+                        (i for i, leg in enumerate(legs) if leg[0] == int(seq)), None
+                    )
+                    if target_index is None:
+                        continue
+
+                    current = progress_along(legs, (vehicle["latitude"], vehicle["longitude"]))
+                    stops_away = target_index - current
+                    approaching.append(
+                        {
+                            "vehicle_id": vehicle["vehicle_id"],
+                            "trip_id": trip_id,
+                            "route_id": vehicle["route_id"],
+                            "type": vehicle["type"],
+                            "headsign": headsigns.get(trip_id),
+                            "latitude": vehicle["latitude"],
+                            "longitude": vehicle["longitude"],
+                            "speed": vehicle["speed"],
+                            "distance_m": round(
+                                metres_between(target, (vehicle["latitude"], vehicle["longitude"]))
+                            ),
+                            "stops_away": stops_away,
+                            # Negative means it has already been past.
+                            "inbound": stops_away >= 0,
+                            "due": arrival or departure,
+                        }
+                    )
+    finally:
+        conn.close()
+
+    approaching.sort(key=lambda a: (not a["inbound"], a["stops_away"], a["distance_m"]))
+    return {
+        "stop": {
+            "stop_id": stop[0],
+            "code": stop[1],
+            "name": stop[2],
+            "latitude": target[0],
+            "longitude": target[1],
+        },
+        "routes": [
+            {
+                "route_id": rid,
+                "name": long_name or short_name or rid,
+                "type": gtfs_type_name(rtype),
+                # 712 is the GTFS code for a school service.
+                "school": rtype == "712",
+                "trips": trips,
+            }
+            for rid, long_name, short_name, rtype, trips in routes
+        ],
+        "approaching": approaching,
+        "now": datetime.now().strftime("%H:%M:%S"),
     }
 
 

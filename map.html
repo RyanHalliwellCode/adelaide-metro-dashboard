@@ -100,7 +100,7 @@
   }
 
   /* Trip panel - sits over the map on the left when you click a vehicle. */
-  #trip {
+  .side-panel {
     position: absolute;
     top: 84px;
     left: 12px;
@@ -114,17 +114,17 @@
     z-index: 1000;
     font-size: 13px;
   }
-  #trip.open { display: flex; }
-  #trip .head {
+  .side-panel.open { display: flex; }
+  .side-panel .head {
     padding: 10px 12px;
     border-bottom: 1px solid #ddd;
     border-left: 5px solid #999;
     border-radius: 4px 0 0 0;
   }
-  #trip .route { font-size: 15px; font-weight: 600; }
-  #trip .sub { color: #666; margin-top: 2px; }
-  #trip .meta { color: #888; margin-top: 4px; font-size: 12px; }
-  #trip .close {
+  .side-panel .route { font-size: 15px; font-weight: 600; }
+  .side-panel .sub { color: #666; margin-top: 2px; }
+  .side-panel .meta { color: #888; margin-top: 4px; font-size: 12px; }
+  .side-panel .close {
     float: right;
     cursor: pointer;
     color: #999;
@@ -132,35 +132,75 @@
     line-height: 1;
     padding-left: 8px;
   }
-  #trip .zoom {
+  .side-panel .zoom {
     display: inline-block;
     margin-top: 6px;
     color: #1c6cb4;
     cursor: pointer;
     font-size: 12px;
   }
-  #trip .stops { overflow-y: auto; padding: 6px 0; }
-  #trip .stop {
+  .side-panel .stops { overflow-y: auto; padding: 6px 0; }
+  .side-panel .stop {
     display: flex;
     gap: 10px;
     padding: 3px 12px;
     line-height: 1.5;
   }
-  #trip .stop .t {
+  .side-panel .stop .t {
     color: #666;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
   /* Stops it has already gone past fade out, the one it's heading for stands out. */
-  #trip .stop.past { opacity: 0.4; }
-  #trip .stop.next { background: #fff5d6; font-weight: 600; }
-  #trip .stop.next .t { color: #333; }
+  .side-panel .stop.past { opacity: 0.4; }
+  .side-panel .stop.next { background: #fff5d6; font-weight: 600; }
+  .side-panel .stop.next .t { color: #333; }
   /* Where the vehicle is sitting right now, as opposed to where it's headed. */
-  #trip .stop.at { background: #dff0d8; font-weight: 600; }
-  #trip .stop.at .t { color: #333; }
-  #trip .tag { color: #b07000; font-weight: 400; font-size: 12px; white-space: nowrap; }
-  #trip .tag.at { color: #3c763d; }
-  #trip .empty { padding: 12px; color: #888; }
+  .side-panel .stop.at { background: #dff0d8; font-weight: 600; }
+  .side-panel .stop.at .t { color: #333; }
+  .side-panel .tag { color: #b07000; font-weight: 400; font-size: 12px; white-space: nowrap; }
+  .side-panel .tag.at { color: #3c763d; }
+  .side-panel .empty { padding: 12px; color: #888; }
+
+  /* Route chips in the stop panel. */
+  .side-panel .chips { margin-top: 4px; }
+  .side-panel .chip {
+    display: inline-block;
+    padding: 1px 6px;
+    margin: 2px 3px 0 0;
+    border-radius: 3px;
+    font-size: 11px;
+    color: white;
+    font-weight: 600;
+    border: 1px solid transparent;
+  }
+  /* Outlined rather than filled, so a once-a-day school run doesn't read as
+     an equal to a route running every ten minutes. */
+  .side-panel .chip.school { background: white; font-weight: 500; }
+  .side-panel .note { margin-top: 6px; color: #888; font-size: 12px; }
+  /* An arriving vehicle: how far off it is, then what it is. */
+  .side-panel .arrival { display: flex; gap: 10px; padding: 4px 12px; align-items: baseline; }
+  .side-panel .arrival .away {
+    min-width: 62px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .side-panel .arrival .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .side-panel .arrival .detail { color: #666; font-size: 12px; }
+  .side-panel .arrival.gone { opacity: 0.45; }
+  .side-panel .group {
+    padding: 8px 12px 2px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+  }
 </style>
 </head>
 <body>
@@ -172,7 +212,7 @@
 
 <div id="map"></div>
 
-<div id="trip">
+<div id="trip" class="side-panel">
   <div class="head">
     <span class="close" id="trip-close">&times;</span>
     <div class="route" id="trip-route"></div>
@@ -181,6 +221,16 @@
     <span class="zoom" id="trip-zoom">Zoom to route</span>
   </div>
   <div class="stops" id="trip-stops"></div>
+</div>
+
+<div id="stop" class="side-panel">
+  <div class="head">
+    <span class="close" id="stop-close">&times;</span>
+    <div class="route" id="stop-name"></div>
+    <div class="sub" id="stop-routes"></div>
+    <div class="meta" id="stop-meta"></div>
+  </div>
+  <div class="stops" id="stop-arrivals"></div>
 </div>
 
 <script>
@@ -510,6 +560,8 @@
     const color = TYPE_COLORS[type];
     selectedKey = markerKey(v);
 
+    // Both panels sit in the same spot, so only one can be open.
+    closeStop();
     panel.classList.add("open");
     panel.querySelector(".head").style.borderLeftColor = color;
     if (!quiet) {
@@ -566,6 +618,179 @@
   document.getElementById("trip-zoom").addEventListener("click", () => {
     if (tripBounds) map.fitBounds(tripBounds, { padding: [40, 40] });
   });
+
+  // --- Stops ---------------------------------------------------------------
+
+  // 9,167 stops is far too many to draw at once, so they only appear once
+  // you're zoomed in enough for the view to hold a sensible number.
+  const STOPS_MIN_ZOOM = 14;
+  const stopsLayer = L.layerGroup();
+  let stopsOn = false;
+  let stopsRequest = 0;
+
+  function stopsHint(text) {
+    const el = document.getElementById("stops-hint");
+    if (el) el.textContent = text;
+  }
+
+  async function loadStops() {
+    if (!stopsOn) return;
+    if (map.getZoom() < STOPS_MIN_ZOOM) {
+      stopsLayer.clearLayers();
+      stopsHint(`Zoom in to level ${STOPS_MIN_ZOOM} to see stops.`);
+      return;
+    }
+
+    const b = map.getBounds();
+    const query = new URLSearchParams({
+      south: b.getSouth(),
+      west: b.getWest(),
+      north: b.getNorth(),
+      east: b.getEast(),
+    });
+
+    // Panning fires these faster than they come back, so ignore stale replies.
+    const ticket = ++stopsRequest;
+    try {
+      const data = await (await fetch(`api/stops?${query}`)).json();
+      if (ticket !== stopsRequest || !stopsOn) return;
+
+      stopsLayer.clearLayers();
+      data.stops.forEach((s) => {
+        L.circleMarker([s.latitude, s.longitude], {
+          radius: 4,
+          color: "#444",
+          weight: 1,
+          fillColor: "#fff",
+          fillOpacity: 1,
+        })
+          .on("click", () => showStop(s.stop_id))
+          .addTo(stopsLayer);
+      });
+      stopsHint(
+        data.truncated
+          ? `${data.stops.length}+ stops here - zoom in for the rest.`
+          : `${data.stops.length} stops in view. Click one.`
+      );
+    } catch (err) {
+      console.error("Loading stops failed:", err);
+      stopsHint("Could not load stops.");
+    }
+  }
+
+  function setStopsMode(on) {
+    stopsOn = on;
+    if (on) {
+      stopsLayer.addTo(map);
+      loadStops();
+    } else {
+      map.removeLayer(stopsLayer);
+      stopsLayer.clearLayers();
+      stopsHint("");
+    }
+  }
+
+  map.on("moveend", loadStops);
+
+  function closeStop() {
+    document.getElementById("stop").classList.remove("open");
+  }
+
+  function describeAway(a) {
+    if (!a.inbound) return "been past";
+    if (a.stops_away === 0) return "at stop";
+    return `${a.stops_away} stop${a.stops_away === 1 ? "" : "s"}`;
+  }
+
+  function renderArrivals(data) {
+    const list = document.getElementById("stop-arrivals");
+    const inbound = data.approaching.filter((a) => a.inbound);
+    const past = data.approaching.filter((a) => !a.inbound);
+
+    if (!data.approaching.length) {
+      list.innerHTML =
+        '<div class="empty">No live vehicle is currently running a trip that calls here. ' +
+        "Services may have finished for the day, or none are in service on these routes right now.</div>";
+      return;
+    }
+
+    const row = (a) => {
+      const color = TYPE_COLORS[a.type] || TYPE_COLORS.unknown;
+      const km = a.distance_m >= 1000
+        ? `${(a.distance_m / 1000).toFixed(1)} km`
+        : `${a.distance_m} m`;
+      return `
+        <div class="arrival${a.inbound ? "" : " gone"}">
+          <span class="away">${describeAway(a)}</span>
+          <span>
+            <span class="dot" style="background:${color}"></span><b>${a.route_id}</b>
+            ${a.headsign ? `to ${a.headsign}` : ""}
+            <div class="detail">${km} away - due ${formatTime(a.due)} - vehicle ${a.vehicle_id}</div>
+          </span>
+        </div>`;
+    };
+
+    list.innerHTML =
+      (inbound.length ? `<div class="group">On the way (${inbound.length})</div>` : "") +
+      inbound.map(row).join("") +
+      (past.length ? `<div class="group">Already been past (${past.length})</div>` : "") +
+      past.map(row).join("");
+  }
+
+  async function showStop(stopId) {
+    closeTrip();
+    const panel = document.getElementById("stop");
+    panel.classList.add("open");
+    panel.querySelector(".head").style.borderLeftColor = "#444";
+    document.getElementById("stop-name").textContent = "Loading stop...";
+    document.getElementById("stop-routes").innerHTML = "";
+    document.getElementById("stop-meta").textContent = "";
+    document.getElementById("stop-arrivals").innerHTML = "";
+
+    try {
+      const response = await fetch(`api/stop/${encodeURIComponent(stopId)}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      document.getElementById("stop-name").textContent = data.stop.name;
+
+      // School services are split out because they run once or twice a day on
+      // school days only. Listed together with the regular routes they make a
+      // stop look far busier than it is, and they're why this list is longer
+      // than the one a journey planner shows.
+      const regular = data.routes.filter((r) => !r.school);
+      const school = data.routes.filter((r) => r.school);
+      const chip = (r) => {
+        const color = TYPE_COLORS[r.type] || TYPE_COLORS.unknown;
+        const trips = `${r.trips} trip${r.trips === 1 ? "" : "s"} in the timetable`;
+        return `<span class="chip${r.school ? " school" : ""}" style="${
+          r.school ? `color:${color};border-color:${color}` : `background:${color}`
+        }" title="${r.name} - ${trips}">${r.route_id}</span>`;
+      };
+
+      document.getElementById("stop-routes").innerHTML =
+        `<div>${regular.length} route${regular.length === 1 ? "" : "s"} serve this stop</div>` +
+        `<div class="chips">${regular.map(chip).join("")}</div>` +
+        (school.length
+          ? `<div class="note">plus ${school.length} school service${
+              school.length === 1 ? "" : "s"
+            }, school days only</div>` + `<div class="chips">${school.map(chip).join("")}</div>`
+          : "");
+
+      const inbound = data.approaching.filter((a) => a.inbound).length;
+      document.getElementById("stop-meta").textContent =
+        `Stop ${data.stop.code || data.stop.stop_id} - ${inbound} vehicle${inbound === 1 ? "" : "s"} heading here now`;
+
+      renderArrivals(data);
+    } catch (err) {
+      console.error("Stop lookup failed:", err);
+      document.getElementById("stop-name").textContent = "Stop unavailable";
+      document.getElementById("stop-arrivals").innerHTML =
+        '<div class="empty">Could not load this stop. Has gtfs.db been built?</div>';
+    }
+  }
+
+  document.getElementById("stop-close").addEventListener("click", closeStop);
 
   // --- Live mode -----------------------------------------------------------
 
@@ -735,6 +960,13 @@
            </label>
            <div class="status" id="live-status">Loading...</div>
            <div class="status" id="live-countdown"></div>
+         </div>
+         <div class="live">
+           <label>
+             <input type="checkbox" id="stops-toggle">
+             Show stops
+           </label>
+           <div class="status" id="stops-hint"></div>
          </div>`;
 
       // Stops checkbox clicks from panning the map underneath.
@@ -754,6 +986,10 @@
       div
         .querySelector("#live-toggle")
         .addEventListener("change", (event) => setLiveMode(event.target.checked));
+
+      div
+        .querySelector("#stops-toggle")
+        .addEventListener("change", (event) => setStopsMode(event.target.checked));
 
       return div;
     };
