@@ -4,40 +4,17 @@
 #   python explore.py stops BEL  stops on a line, in order
 #   python explore.py next BEL   next few departures from the feed's timetable
 
-import sqlite3
 import sys
-from datetime import datetime
+from datetime import date, datetime
 
-DB = "gtfs.db"
+import db
 
 
 def connect():
     try:
-        return sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
-    except sqlite3.OperationalError:
-        sys.exit(f"No {DB} yet - run 'python gtfs_static.py' first.")
-
-
-def services_today(conn):
-    # Without this you get every timetable at once - weekday, Saturday, Sunday
-    # and school services all stacked on the same line.
-    today = datetime.now()
-    weekday = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"][today.weekday()]
-    stamp = today.strftime("%Y%m%d")
-
-    active = {
-        row[0]
-        for row in conn.execute(
-            f"SELECT service_id FROM calendar WHERE {weekday}='1' AND start_date<=? AND end_date>=?",
-            (stamp, stamp),
-        )
-    }
-    # calendar_dates overrides the weekly pattern: 1 adds a day, 2 removes it.
-    for service_id, exception in conn.execute(
-        "SELECT service_id, exception_type FROM calendar_dates WHERE date=?", (stamp,)
-    ):
-        active.add(service_id) if exception == "1" else active.discard(service_id)
-    return active
+        return db.connect()
+    except db.MissingDatabase as exc:
+        sys.exit(str(exc))
 
 
 def summary(conn):
@@ -53,9 +30,8 @@ def summary(conn):
 
     print("\nRoutes by type:")
     rows = conn.execute("SELECT route_type, COUNT(*) FROM routes GROUP BY route_type ORDER BY 2 DESC")
-    names = {"0": "tram", "2": "train", "3": "bus", "4": "ferry", "700": "bus", "701": "bus", "712": "bus"}
     for rtype, count in rows:
-        print(f"  {names.get(rtype, '?'):6s} (type {rtype:3s}) {count:>4}")
+        print(f"  {db.gtfs_type_name(rtype):6s} (type {rtype:3s}) {count:>4}")
 
 
 def lines(conn):
@@ -64,9 +40,8 @@ def lines(conn):
                FROM routes r LEFT JOIN trips t ON t.route_id = r.route_id
                WHERE r.route_type IN ('0','2','4')
                GROUP BY r.route_id ORDER BY r.route_type, r.route_id"""
-    names = {"0": "tram", "2": "train", "4": "ferry"}
     for rtype, rid, long_name, trips in conn.execute(query):
-        print(f"  {names[rtype]:5s} {rid:8s} {long_name[:44]:46s} {trips:>5} trips")
+        print(f"  {db.gtfs_type_name(rtype):5s} {rid:8s} {long_name[:44]:46s} {trips:>5} trips")
 
 
 def stops(conn, route_id):
@@ -94,7 +69,7 @@ def stops(conn, route_id):
 
 def next_departures(conn, route_id):
     now = datetime.now().strftime("%H:%M:%S")
-    active = services_today(conn)
+    active = db.services_on(conn, date.today())
     if not active:
         sys.exit("No services running today - the feed may have expired.")
 

@@ -1,17 +1,19 @@
 """
-Grabs live vehicle positions from the Adelaide Metro GTFS realtime feed.
+Client for the Adelaide Metro GTFS-realtime feed.
 
 The debug endpoint gives us plain text instead of binary protobuf, so regex
 parsing is enough and we don't need a protobuf library.
+
+Run it directly for a quick check of what the feed is reporting.
 """
 
-import json
 import re
 import urllib.request
 from collections import Counter
 
+import db
+
 DEBUG_URL = "https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions/debug"
-OUTPUT_PATH = "vehicles.json"
 
 # Format: each entry has two "vehicle {" blocks, so we split on "entity {".
 LAT_RE = re.compile(r"latitude:\s*(-?\d+\.?\d*)")
@@ -22,9 +24,10 @@ VEHICLE_ID_RE = re.compile(r'vehicle\s*\{\s*id:\s*"([^"]*)"')
 TRIP_ID_RE = re.compile(r'trip_id:\s*"([^"]*)"')
 BEARING_RE = re.compile(r"bearing:\s*(-?\d+\.?\d*)")
 SPEED_RE = re.compile(r"speed:\s*(-?\d+\.?\d*)")
+HEADER_TIMESTAMP_RE = re.compile(r"timestamp:\s*(\d+)")
 
 
-def fetch_debug_text(url: str) -> str:
+def fetch_debug_text(url: str = DEBUG_URL) -> str:
     """Download the raw text body of the GTFS-realtime debug feed."""
     # CloudFront serves stale copies without this, which freezes the live map.
     request = urllib.request.Request(
@@ -35,40 +38,26 @@ def fetch_debug_text(url: str) -> str:
         return response.read().decode("utf-8")
 
 
-# Taken from route_type in routes.txt, hardcoded to avoid a 17 MB download.
-# Don't guess from the ID shape - G10, H33 and J1 are all buses, not trains.
-RAIL_ROUTES = frozenset({
-    "BEL", "FLNDRS", "GAW", "GAWC", "GRNG", "NOAR",
-    "OSBORN", "OUTHA", "PTDOCK", "SALIS", "SEAFRD",
-})
-TRAM_ROUTES = frozenset({"BTANIC", "FESTVL", "GLNELG"})
-
-# The Kangaroo Island ferry. Never shows up live, but it's not a bus either.
-FERRY_ROUTES = frozenset({"SEALNK"})
+def parse_feed_timestamp(text: str) -> int | None:
+    # Slice off the entities first or we'd match a vehicle's own timestamp.
+    match = HEADER_TIMESTAMP_RE.search(text.split("entity {", 1)[0])
+    return int(match.group(1)) if match else None
 
 
-def classify_vehicle(route_id: str) -> str:
-    """Map a GTFS route_id to a broad vehicle type for map display."""
-    if not route_id:
-        return "unknown"
-    if route_id in RAIL_ROUTES:
-        return "train"
-    if route_id in TRAM_ROUTES:
-        return "tram"
-    if route_id in FERRY_ROUTES:
-        return "ferry"
-    return "bus"
-
-
-def parse_vehicles(text: str) -> list[dict]:
-    """Pull the fields we care about out of each entity block."""
+def parse_vehicles(text: str, route_types: dict[str, str] | None = None) -> list[dict]:
+    """
+    Pull the fields we care about out of each entity block. route_types comes
+    from the timetable, so nothing here has to know which routes are trains.
+    """
+    lookup = route_types or {}
     vehicles = []
 
-    blocks = text.split("entity {")[1:]  # skip the header before the first entry
-
-    for block in blocks:
+    for block in text.split("entity {")[1:]:  # skip the header before the first entry
         lat_match = LAT_RE.search(block)
         lon_match = LON_RE.search(block)
+        if not lat_match or not lon_match:
+            continue  # no coordinates, no marker
+
         route_match = ROUTE_ID_RE.search(block)
         vehicle_id_match = VEHICLE_ID_RE.search(block)
         trip_match = TRIP_ID_RE.search(block)
@@ -77,37 +66,27 @@ def parse_vehicles(text: str) -> list[dict]:
         route_id = route_match.group(1) if route_match else None
 
         vehicles.append({
-            "latitude": float(lat_match.group(1)) if lat_match else None,
-            "longitude": float(lon_match.group(1)) if lon_match else None,
+            "latitude": float(lat_match.group(1)),
+            "longitude": float(lon_match.group(1)),
             "route_id": route_id,
             "vehicle_id": vehicle_id_match.group(1) if vehicle_id_match else None,
             "trip_id": trip_match.group(1) if trip_match else None,
             "bearing": float(bearing_match.group(1)) if bearing_match else None,
             "speed": float(speed_match.group(1)) if speed_match else None,
-            "type": classify_vehicle(route_id),
+            "type": lookup.get(route_id, "unknown"),
         })
 
-    # No coordinates, no marker.
-    return [v for v in vehicles if v["latitude"] is not None and v["longitude"] is not None]
+    return vehicles
 
 
 def main():
-    text = fetch_debug_text(DEBUG_URL)
-    vehicles = parse_vehicles(text)
+    text = fetch_debug_text()
+    vehicles = parse_vehicles(text, db.route_types())
 
-    for v in vehicles:
-        print(v)
-
-    print(f"\nTotal vehicles found: {len(vehicles)}")
-
-    # Sanity check - hundreds of trains would mean classification is broken.
-    counts = Counter(v["type"] for v in vehicles)
-    for vehicle_type, count in counts.most_common():
+    print(f"{len(vehicles)} vehicles reported at feed timestamp {parse_feed_timestamp(text)}")
+    # Hundreds of trains would mean the route lookup is broken.
+    for vehicle_type, count in Counter(v["type"] for v in vehicles).most_common():
         print(f"  {vehicle_type}: {count}")
-
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
-        json.dump(vehicles, f, indent=2)
-    print(f"Wrote static snapshot to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

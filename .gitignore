@@ -3,3 +3,8 @@ __pycache__/
 # Rebuildable from the feed - 17 MB zip, ~90 MB database.
 gtfs_static.zip
 gtfs.db
+# WAL sidecar files, created while the server is recording.
+gtfs.db-wal
+gtfs.db-shm
+# Live positions live in gtfs.db now, not a JSON file.
+vehicles.json

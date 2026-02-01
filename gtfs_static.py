@@ -1,7 +1,9 @@
 # Dumps the static GTFS feed (the timetable) into gtfs.db so we can query it.
 #   python gtfs_static.py            build the db
 #   python gtfs_static.py --refresh  re-download first
-#   python gtfs_static.py --validate just check our route sets
+#
+# Only tables named after a GTFS .txt file are dropped and rebuilt, so the
+# vehicle_positions the server records survive a refresh.
 
 import argparse
 import csv
@@ -9,27 +11,15 @@ import io
 import sqlite3
 import urllib.request
 import zipfile
-from pathlib import Path
+
+from db import DB_PATH
 
 STATIC_URL = "https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip"
-ZIP_PATH = Path("gtfs_static.zip")
-DB_PATH = Path("gtfs.db")
+ZIP_PATH = DB_PATH.parent / "gtfs_static.zip"
 
 # Nothing skipped now - shapes.txt is big but it's the only thing that knows
 # where the tracks actually go. Straight lines between stops cut every corner.
 SKIP_FILES = set()
-
-# route_type codes -> our names. 700s are just more buses, 4 is the ferry.
-ROUTE_TYPES = {
-    "0": "tram",
-    "2": "train",
-    "3": "bus",
-    "4": "ferry",
-    "700": "bus",
-    "701": "bus",
-    "712": "bus",
-    "715": "bus",
-}
 
 # Without these, "stops on this trip" takes forever. The trip_id and route_id
 # ones matter most: joining stop_times -> trips -> routes without them scans
@@ -110,49 +100,8 @@ def build(force_download: bool = False) -> None:
     print(f"Feed version {version[2]}, valid {version[0]} to {version[1]}")
 
 
-def validate() -> None:
-    # Checks our hardcoded route sets against what the feed actually says.
-    from main import RAIL_ROUTES, TRAM_ROUTES, FERRY_ROUTES, classify_vehicle
-
-    if not DB_PATH.exists():
-        print(f"{DB_PATH} not found - run 'python gtfs_static.py' first.")
-        return
-
-    conn = sqlite3.connect(DB_PATH)
-    rows = conn.execute("SELECT route_id, route_type FROM routes").fetchall()
-    conn.close()
-
-    truth = {rid: ROUTE_TYPES.get(rtype, "unknown") for rid, rtype in rows}
-    hardcoded = {"train": RAIL_ROUTES, "tram": TRAM_ROUTES, "ferry": FERRY_ROUTES}
-
-    problems = 0
-    for expected, ids in hardcoded.items():
-        for rid in sorted(ids):
-            actual = truth.get(rid)
-            if actual != expected:
-                problems += 1
-                print(f"  {rid}: we call it {expected}, feed says {actual or 'not in feed'}")
-
-    # Other direction - catches a new train line we haven't added yet.
-    for rid, actual in sorted(truth.items()):
-        if actual in hardcoded and rid not in hardcoded[actual]:
-            problems += 1
-            print(f"  {rid}: feed says {actual}, missing from our list")
-
-    mismatched = [r for r, t in truth.items() if classify_vehicle(r) != t]
-    print(f"\n{len(truth)} routes checked, {len(mismatched)} classified differently.")
-    print("All route sets match the feed." if not problems else f"{problems} problems above.")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build gtfs.db from the static GTFS feed.")
     parser.add_argument("--refresh", action="store_true", help="force a fresh download")
-    parser.add_argument("--validate", action="store_true", help="check route sets only")
     args = parser.parse_args()
-
-    if args.validate:
-        validate()
-    else:
-        build(force_download=args.refresh)
-        print()
-        validate()
+    build(force_download=args.refresh)
