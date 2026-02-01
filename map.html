@@ -178,6 +178,35 @@
      an equal to a route running every ten minutes. */
   .side-panel .chip.school { background: white; font-weight: 500; }
   .side-panel .note { margin-top: 6px; color: #888; font-size: 12px; }
+
+  /* The number actually painted on the vehicle. */
+  .side-panel .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    margin-right: 7px;
+    border-radius: 3px;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    vertical-align: 1px;
+  }
+  .side-panel .arrival.clickable { cursor: pointer; }
+  .side-panel .arrival.clickable:hover { background: #eef4fb; }
+  .side-panel .arrival.selected { background: #e2ecf7; }
+  .side-panel .sched {
+    display: flex;
+    gap: 10px;
+    padding: 3px 12px;
+    line-height: 1.5;
+  }
+  .side-panel .sched .t {
+    min-width: 62px;
+    color: #333;
+    font-variant-numeric: tabular-nums;
+  }
+  .side-panel .sched .num { font-weight: 600; margin-right: 5px; }
+  .side-panel .sched.school .num { color: #8a6d3b; }
+  .side-panel .sched .to { color: #666; }
   /* An arriving vehicle: how far off it is, then what it is. */
   .side-panel .arrival { display: flex; gap: 10px; padding: 4px 12px; align-items: baseline; }
   .side-panel .arrival .away {
@@ -219,6 +248,7 @@
     <div class="sub" id="trip-sub"></div>
     <div class="meta" id="trip-meta"></div>
     <span class="zoom" id="trip-zoom">Zoom to route</span>
+    <span class="zoom" id="trip-back" style="display:none; margin-left:12px">&larr; Back to stop</span>
   </div>
   <div class="stops" id="trip-stops"></div>
 </div>
@@ -364,12 +394,33 @@
   const tripLayer = L.layerGroup().addTo(map);
   let tripBounds = null;
   let selectedKey = null;
+  let cameFromStop = null;
+
+  // One dot among several hundred identical ones is impossible to follow, so
+  // the selected vehicle gets bigger and takes a dark outline.
+  function clearHighlight() {
+    if (selectedKey && markers.has(selectedKey)) {
+      const entry = markers.get(selectedKey);
+      entry.marker.setRadius(6);
+      entry.marker.setStyle({ weight: 3, color: TYPE_COLORS[entry.type], fillOpacity: 0.8 });
+    }
+  }
+
+  function highlightVehicle(key) {
+    const entry = markers.get(key);
+    if (!entry) return;
+    entry.marker.setRadius(10);
+    entry.marker.setStyle({ weight: 4, color: "#111", fillOpacity: 1 });
+    entry.marker.bringToFront();
+  }
 
   function closeTrip() {
     document.getElementById("trip").classList.remove("open");
     tripLayer.clearLayers();
+    clearHighlight();
     tripBounds = null;
     selectedKey = null;
+    cameFromStop = null;
   }
 
   function drawTripLine(data, color) {
@@ -554,11 +605,17 @@
 
   // quiet = a live refresh redrawing the panel that's already open, so skip the
   // loading state that would otherwise flash every 15 seconds.
-  async function showTrip(v, quiet) {
+  async function showTrip(v, quiet, fromStopId) {
     const panel = document.getElementById("trip");
     const type = normaliseType(v.type);
     const color = TYPE_COLORS[type];
+
+    if (!quiet) clearHighlight();
     selectedKey = markerKey(v);
+    highlightVehicle(selectedKey);
+
+    if (fromStopId !== undefined) cameFromStop = fromStopId;
+    document.getElementById("trip-back").style.display = cameFromStop ? "inline-block" : "none";
 
     // Both panels sit in the same spot, so only one can be open.
     closeStop();
@@ -584,7 +641,10 @@
       }
       const data = await response.json();
 
-      document.getElementById("trip-route").textContent = data.route_name;
+      // Lead with the number on the vehicle - that's what identifies it at a
+      // stop. The long name describes the corridor, not this trip's direction.
+      document.getElementById("trip-route").innerHTML =
+        `<span class="badge" style="background:${color}">${data.route_short}</span>${data.route_name}`;
       document.getElementById("trip-sub").textContent = data.headsign
         ? `Towards ${data.headsign}`
         : `Route ${data.route_id}`;
@@ -707,38 +767,65 @@
     const inbound = data.approaching.filter((a) => a.inbound);
     const past = data.approaching.filter((a) => !a.inbound);
 
-    if (!data.approaching.length) {
-      list.innerHTML =
-        '<div class="empty">No live vehicle is currently running a trip that calls here. ' +
-        "Services may have finished for the day, or none are in service on these routes right now.</div>";
-      return;
-    }
-
     const row = (a) => {
       const color = TYPE_COLORS[a.type] || TYPE_COLORS.unknown;
       const km = a.distance_m >= 1000
         ? `${(a.distance_m / 1000).toFixed(1)} km`
         : `${a.distance_m} m`;
+      // Only vehicles we still have a marker for can be opened and highlighted.
+      const clickable = markers.has(a.vehicle_id) ? " clickable" : "";
       return `
-        <div class="arrival${a.inbound ? "" : " gone"}">
+        <div class="arrival${a.inbound ? "" : " gone"}${clickable}" data-key="${a.vehicle_id}">
           <span class="away">${describeAway(a)}</span>
           <span>
-            <span class="dot" style="background:${color}"></span><b>${a.route_id}</b>
+            <span class="dot" style="background:${color}"></span><b>${a.route_short || a.route_id}</b>
             ${a.headsign ? `to ${a.headsign}` : ""}
             <div class="detail">${km} away - due ${formatTime(a.due)} - vehicle ${a.vehicle_id}</div>
           </span>
         </div>`;
     };
 
-    list.innerHTML =
-      (inbound.length ? `<div class="group">On the way (${inbound.length})</div>` : "") +
-      inbound.map(row).join("") +
-      (past.length ? `<div class="group">Already been past (${past.length})</div>` : "") +
-      past.map(row).join("");
+    const schedRow = (s) => `
+      <div class="sched${s.school ? " school" : ""}">
+        <span class="t">${formatTime(s.time)}</span>
+        <span><span class="num">${s.route_short}</span><span class="to">${
+          s.headsign || ""
+        }${s.school ? " (school)" : ""}</span></span>
+      </div>`;
+
+    let html = "";
+
+    if (data.approaching.length) {
+      html +=
+        (inbound.length ? `<div class="group">On the way (${inbound.length}) - click to follow</div>` : "") +
+        inbound.map(row).join("") +
+        (past.length ? `<div class="group">Already been past (${past.length})</div>` : "") +
+        past.map(row).join("");
+    } else {
+      html +=
+        '<div class="empty">Nothing live is running a trip that calls here right now.</div>';
+    }
+
+    // The timetable, which is the useful part when nothing is live.
+    if (data.scheduled && data.scheduled.length) {
+      html += `<div class="group">Scheduled from here today</div>` + data.scheduled.map(schedRow).join("");
+    } else if (data.next_service_day) {
+      const n = data.next_service_day;
+      html +=
+        `<div class="group">Nothing more today - next is ${n.weekday}</div>` +
+        n.departures.map(schedRow).join("");
+    } else {
+      html += '<div class="empty">No scheduled departures found in the current timetable.</div>';
+    }
+
+    list.innerHTML = html;
   }
+
+  let currentStopId = null;
 
   async function showStop(stopId) {
     closeTrip();
+    currentStopId = stopId;
     const panel = document.getElementById("stop");
     panel.classList.add("open");
     panel.querySelector(".head").style.borderLeftColor = "#444";
@@ -791,6 +878,18 @@
   }
 
   document.getElementById("stop-close").addEventListener("click", closeStop);
+
+  // Delegated, because the arrivals list is rebuilt on every stop lookup.
+  document.getElementById("stop-arrivals").addEventListener("click", (event) => {
+    const row = event.target.closest(".arrival.clickable");
+    if (!row) return;
+    const entry = markers.get(row.dataset.key);
+    if (entry) showTrip(entry.vehicle, false, currentStopId);
+  });
+
+  document.getElementById("trip-back").addEventListener("click", () => {
+    if (cameFromStop) showStop(cameFromStop);
+  });
 
   // --- Live mode -----------------------------------------------------------
 

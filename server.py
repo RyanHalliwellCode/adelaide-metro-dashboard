@@ -17,7 +17,7 @@ import re
 import sqlite3
 import time
 from contextlib import asynccontextmanager, suppress
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -206,7 +206,8 @@ def api_trip(trip_id: str) -> dict:
             """SELECT t.route_id, t.trip_headsign, t.direction_id, t.shape_id,
                       r.route_long_name, r.route_short_name, r.route_type
                FROM trips t JOIN routes r ON r.route_id = t.route_id
-               WHERE t.trip_id = ?""",
+               WHERE t.trip_id = ?""",  # route_short_name is the number on the bus
+
             (trip_id,),
         ).fetchone()
         if not trip:
@@ -240,6 +241,8 @@ def api_trip(trip_id: str) -> dict:
         "trip_id": trip_id,
         "route_id": route_id,
         "route_name": long_name or short_name or route_id,
+        # The number actually painted on the vehicle, e.g. 430 or M44.
+        "route_short": short_name or route_id,
         "headsign": headsign,
         "direction_id": direction,
         "route_type": route_type,
@@ -260,7 +263,66 @@ def api_trip(trip_id: str) -> dict:
     }
 
 
+WEEKDAY_COLUMNS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
 GTFS_TYPE_NAMES = {"0": "tram", "2": "train", "3": "bus", "4": "ferry"}
+
+
+def services_on(conn: sqlite3.Connection, day: date) -> set[str]:
+    """
+    Which service_ids run on a given date. Without this you get every timetable
+    stacked together - weekday, Saturday, Sunday and school services at once.
+    """
+    stamp = day.strftime("%Y%m%d")
+    column = WEEKDAY_COLUMNS[day.weekday()]
+    active = {
+        row[0]
+        for row in conn.execute(
+            f"SELECT service_id FROM calendar WHERE {column}='1' AND start_date<=? AND end_date>=?",
+            (stamp, stamp),
+        )
+    }
+    # calendar_dates overrides the weekly pattern: 1 adds a day, 2 removes it.
+    for service_id, exception in conn.execute(
+        "SELECT service_id, exception_type FROM calendar_dates WHERE date=?", (stamp,)
+    ):
+        if exception == "1":
+            active.add(service_id)
+        else:
+            active.discard(service_id)
+    return active
+
+
+def departures_at(
+    conn: sqlite3.Connection, stop_id: str, services: set[str], after: str, limit: int
+) -> list[dict]:
+    if not services:
+        return []
+    marks = ",".join("?" * len(services))
+    rows = conn.execute(
+        f"""SELECT st.departure_time, st.arrival_time, r.route_id, r.route_short_name,
+                   r.route_type, t.trip_headsign, t.trip_id
+            FROM stop_times st
+            JOIN trips t ON t.trip_id = st.trip_id
+            JOIN routes r ON r.route_id = t.route_id
+            WHERE st.stop_id = ? AND t.service_id IN ({marks})
+              AND COALESCE(NULLIF(st.departure_time,''), st.arrival_time) > ?
+            ORDER BY COALESCE(NULLIF(st.departure_time,''), st.arrival_time)
+            LIMIT ?""",
+        (stop_id, *services, after, limit),
+    ).fetchall()
+    return [
+        {
+            "time": departure or arrival,
+            "route_id": route_id,
+            "route_short": short or route_id,
+            "type": gtfs_type_name(route_type),
+            "school": route_type == "712",
+            "headsign": headsign,
+            "trip_id": trip_id,
+        }
+        for departure, arrival, route_id, short, route_type, headsign, trip_id in rows
+    ]
 
 
 def gtfs_type_name(route_type: str) -> str:
@@ -362,6 +424,10 @@ def api_stop(stop_id: str) -> dict:
             (stop_id,),
         ).fetchall()
 
+        # Every approaching vehicle is on a route that calls here, so this
+        # covers all of them without another query.
+        short_names = {rid: (short or rid) for rid, _long, short, _rtype, _n in routes}
+
         # Which live vehicles are on a trip that calls here.
         by_trip = {v["trip_id"]: v for v in cache.vehicles if v.get("trip_id")}
         approaching = []
@@ -417,6 +483,7 @@ def api_stop(stop_id: str) -> dict:
                             "vehicle_id": vehicle["vehicle_id"],
                             "trip_id": trip_id,
                             "route_id": vehicle["route_id"],
+                            "route_short": short_names.get(vehicle["route_id"], vehicle["route_id"]),
                             "type": vehicle["type"],
                             "headsign": headsigns.get(trip_id),
                             "latitude": vehicle["latitude"],
@@ -431,11 +498,33 @@ def api_stop(stop_id: str) -> dict:
                             "due": arrival or departure,
                         }
                     )
+        # The timetable side. Matters most on a quiet stop, where "no live
+        # vehicle is coming" tells you nothing about when one actually will.
+        now_clock = datetime.now().strftime("%H:%M:%S")
+        today = date.today()
+        scheduled = departures_at(conn, stop_id, services_on(conn, today), now_clock, 12)
+
+        # Nothing left today, so say which day it next runs rather than leaving
+        # a school-only stop looking dead.
+        next_day = None
+        if not scheduled:
+            for offset in range(1, 8):
+                day = today + timedelta(days=offset)
+                later = departures_at(conn, stop_id, services_on(conn, day), "00:00:00", 6)
+                if later:
+                    next_day = {
+                        "date": day.isoformat(),
+                        "weekday": day.strftime("%A"),
+                        "departures": later,
+                    }
+                    break
     finally:
         conn.close()
 
     approaching.sort(key=lambda a: (not a["inbound"], a["stops_away"], a["distance_m"]))
     return {
+        "scheduled": scheduled,
+        "next_service_day": next_day,
         "stop": {
             "stop_id": stop[0],
             "code": stop[1],
