@@ -368,19 +368,34 @@ def api_trip(trip_id: str, lat: float | None = None, lon: float | None = None) -
     }
 
 
-def departures_at(conn, stop_id: str, services: set[str], after: str, limit: int) -> list[dict]:
+def normalise_time(value: str | None) -> str | None:
+    """Accept '17:30' or '17:30:00' from the query string, or nothing."""
+    if not value:
+        return None
+    parts = value.split(":")
+    if len(parts) < 2 or not all(p.isdigit() for p in parts):
+        raise HTTPException(400, f"bad time '{value}' - expected HH:MM")
+    hours, minutes = int(parts[0]), int(parts[1])
+    seconds = int(parts[2]) if len(parts) > 2 else 0
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def departures_at(
+    conn, stop_id: str, services: set[str], after: str, limit: int, before: str | None = None
+) -> list[dict]:
     if not services:
         return []
     marks = ",".join("?" * len(services))
+    window = "AND t < ?" if before else ""
     rows = conn.execute(
         f"""SELECT COALESCE(NULLIF(st.departure_time,''), st.arrival_time) AS t,
                    r.route_id, r.route_short_name, r.route_type, t2.trip_headsign, t2.trip_id
             FROM stop_times st
             JOIN trips t2 ON t2.trip_id = st.trip_id
             JOIN routes r ON r.route_id = t2.route_id
-            WHERE st.stop_id = ? AND t2.service_id IN ({marks}) AND t > ?
+            WHERE st.stop_id = ? AND t2.service_id IN ({marks}) AND t >= ? {window}
             ORDER BY t LIMIT ?""",
-        (stop_id, *services, after, limit),
+        (stop_id, *services, after, *( [before] if before else [] ), limit),
     ).fetchall()
     return [
         {
@@ -489,10 +504,21 @@ def api_stops(south: float, west: float, north: float, east: float, limit: int =
 
 
 @app.get("/api/stop/{stop_id}")
-def api_stop(stop_id: str) -> dict:
-    """Everything about one stop: what serves it, what's coming, what's due."""
+def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = None) -> dict:
+    """
+    Everything about one stop: what serves it, what's coming, what's due.
+
+    from_time/to_time narrow the timetable to a window - "what leaves here
+    between 5:30 and 6:30" - instead of the next few from right now.
+    """
     cache: FeedCache = app.state.cache
     cache.touch()
+    window_from = normalise_time(from_time)
+    window_to = normalise_time(to_time)
+    # "from 5 to 5" is an empty range and would return nothing, which reads as
+    # broken. Treat any end that isn't after the start as open-ended instead.
+    if window_from and window_to and window_to <= window_from:
+        window_to = None
 
     conn = open_db()
     try:
@@ -526,12 +552,22 @@ def api_stop(stop_id: str) -> dict:
         # vehicle is coming" tells you nothing about when one actually will.
         now = datetime.now().strftime("%H:%M:%S")
         today = date.today()
-        scheduled = departures_at(conn, stop_id, db.services_on(conn, today), now, 12)
+        today_services = db.services_on(conn, today)
+
+        if window_from or window_to:
+            # An explicit window can hold a lot more than the next few, and the
+            # point is to see everything in it.
+            scheduled = departures_at(
+                conn, stop_id, today_services, window_from or "00:00:00", 60, window_to
+            )
+        else:
+            scheduled = departures_at(conn, stop_id, today_services, now, 12)
 
         # Nothing left today, so say which day it next runs rather than leaving
-        # a school-only stop looking dead.
+        # a school-only stop looking dead. Only when browsing from now - an
+        # empty window just means nothing runs then, which is the answer.
         next_day = None
-        if not scheduled:
+        if not scheduled and not (window_from or window_to):
             for offset in range(1, 8):
                 day = today + timedelta(days=offset)
                 later = departures_at(conn, stop_id, db.services_on(conn, day), "00:00:00", 6)
@@ -566,11 +602,61 @@ def api_stop(stop_id: str) -> dict:
         "approaching": approaching,
         "scheduled": scheduled,
         "next_service_day": next_day,
+        "window": {"from": window_from, "to": window_to},
         "now": now,
     }
+
+
+@app.get("/api/shapes")
+def api_shapes(trip_ids: str, every: int = 4) -> dict:
+    """
+    Route geometry for several trips at once, thinned. Used to sketch every
+    route leaving a stop in a time window - context lines, so full precision
+    would just be a slower way to draw the same picture.
+    """
+    wanted = [t for t in trip_ids.split(",") if t][:40]
+    if not wanted:
+        return {"shapes": {}}
+
+    conn = open_db()
+    try:
+        marks = ",".join("?" * len(wanted))
+        shape_of = dict(
+            conn.execute(f"SELECT trip_id, shape_id FROM trips WHERE trip_id IN ({marks})", wanted)
+        )
+        shape_ids = sorted({s for s in shape_of.values() if s})
+        if not shape_ids:
+            return {"shapes": {}}
+
+        marks = ",".join("?" * len(shape_ids))
+        points: dict[str, list] = {}
+        for shape_id, lat, lon in conn.execute(
+            f"""SELECT shape_id, shape_pt_lat, shape_pt_lon FROM shapes
+                WHERE shape_id IN ({marks})
+                ORDER BY shape_id, CAST(shape_pt_sequence AS INTEGER)""",
+            shape_ids,
+        ):
+            points.setdefault(shape_id, []).append([float(lat), float(lon)])
+    finally:
+        conn.close()
+
+    thinned = {}
+    for shape_id, pts in points.items():
+        # Keep the last point so the line still reaches the end of the route.
+        kept = pts[::every]
+        if kept[-1] != pts[-1]:
+            kept.append(pts[-1])
+        thinned[shape_id] = kept
+
+    return {"shapes": {trip: thinned.get(shape_of.get(trip), []) for trip in wanted}}
 
 
 # Explicit route, not a static mount - a mount would also serve .git.
 @app.get("/")
 async def index() -> FileResponse:
-    return FileResponse(BASE_DIR / "map.html")
+    # no-store because this is a dev server and a cached map.html means edits
+    # silently don't appear - you end up debugging code the browser isn't running.
+    return FileResponse(
+        BASE_DIR / "map.html",
+        headers={"Cache-Control": "no-store, must-revalidate"},
+    )

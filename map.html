@@ -162,6 +162,9 @@
   .side-panel .tag.at { color: #3c763d; }
   .side-panel .empty { padding: 12px; color: #888; }
 
+  /* Leaflet gives divIcons a white box and border by default. */
+  .route-arrow { background: none; border: none; }
+
   /* Route chips in the stop panel. */
   .side-panel .chips { margin-top: 4px; }
   .side-panel .chip {
@@ -207,6 +210,28 @@
   .side-panel .sched .num { font-weight: 600; margin-right: 5px; }
   .side-panel .sched.school .num { color: #8a6d3b; }
   .side-panel .sched .to { color: #666; }
+  .side-panel .sched.clickable { cursor: pointer; }
+  .side-panel .sched.clickable:hover { background: #eef4fb; }
+
+  /* Time window controls on the stop panel. */
+  .side-panel .window {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    color: #555;
+  }
+  .side-panel .window input[type="time"] {
+    font-size: 12px;
+    padding: 1px 3px;
+    margin: 0 4px;
+  }
+  .side-panel .window .draw {
+    display: block;
+    margin-top: 6px;
+    cursor: pointer;
+  }
+  .side-panel .window .draw input { margin-right: 5px; }
   /* An arriving vehicle: how far off it is, then what it is. */
   .side-panel .arrival { display: flex; gap: 10px; padding: 4px 12px; align-items: baseline; }
   .side-panel .arrival .away {
@@ -259,6 +284,12 @@
     <div class="route" id="stop-name"></div>
     <div class="sub" id="stop-routes"></div>
     <div class="meta" id="stop-meta"></div>
+    <div class="window">
+      <label>From <input type="time" id="stop-from"></label>
+      <label>to <input type="time" id="stop-to"></label>
+      <span class="zoom" id="stop-now">now</span>
+      <label class="draw"><input type="checkbox" id="stop-draw"> Sketch every route in this window</label>
+    </div>
   </div>
   <div class="stops" id="stop-arrivals"></div>
 </div>
@@ -409,6 +440,41 @@
     cameFromStop = null;
   }
 
+  // Which way is it going? A line alone can't say, and a route that passes your
+  // stop in the wrong direction is useless to you.
+  function addDirectionArrows(path, color, layer, count = 8, size = 16) {
+    // Spaced by point index rather than distance - shape points are roughly
+    // evenly spread, so this gives about the same number of arrows whether the
+    // route is 95 points or 982.
+    const step = Math.max(1, Math.round(path.length / count));
+    const half = size / 2;
+    for (let i = step; i < path.length - 1; i += step) {
+      const [aLat, aLon] = path[i];
+      const [bLat, bLon] = path[i + 1];
+      const dy = bLat - aLat;
+      const dx = (bLon - aLon) * Math.cos((aLat * Math.PI) / 180);
+      if (!dx && !dy) continue;
+      // 0 degrees is north, and the glyph is drawn pointing up.
+      const heading = (Math.atan2(dx, dy) * 180) / Math.PI;
+
+      L.marker(path[i], {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({
+          className: "route-arrow",
+          iconSize: [size, size],
+          iconAnchor: [half, half],
+          // White fill outlined in the route colour, so the arrow reads against
+          // the coloured line it sits on rather than blending into it.
+          html:
+            `<svg width="${size}" height="${size}" viewBox="0 0 16 16" style="transform:rotate(${heading}deg)">` +
+            `<path d="M8 1 L13.5 14 L8 11 L2.5 14 Z" fill="white" stroke="${color}" stroke-width="1.8"` +
+            ' stroke-linejoin="round"/></svg>',
+        }),
+      }).addTo(layer);
+    }
+  }
+
   function drawTripLine(data, color) {
     tripLayer.clearLayers();
 
@@ -434,6 +500,20 @@
         weight: 2,
       }).addTo(tripLayer);
     });
+
+    addDirectionArrows(path, color, tripLayer);
+
+    // Green start, red end, so the two ends of the line are never ambiguous.
+    if (stopPoints.length > 1) {
+      L.circleMarker(stopPoints[0], {
+        radius: 7, color: "white", weight: 2, fillColor: "#2e8b3d", fillOpacity: 1,
+      }).addTo(tripLayer).bindTooltip(`Start: ${data.stops[0].name}`);
+      const last = data.stops[data.stops.length - 1];
+      L.circleMarker(stopPoints[stopPoints.length - 1], {
+        radius: 7, color: "white", weight: 2, fillColor: "#c0392b", fillOpacity: 1,
+      }).addTo(tripLayer).bindTooltip(`End: ${last.name}`);
+    }
+
     tripBounds = L.latLngBounds(path);
   }
 
@@ -448,11 +528,13 @@
     return `${hour12}:${String(minutes).padStart(2, "0")} ${suffix}`;
   }
 
-  function renderStops(data, autoScroll) {
+  // plain = a scheduled route with no vehicle on it, so nothing is "at" or
+  // "next" and none of the stops are behind anything.
+  function renderStops(data, autoScroll, plain) {
     const list = document.getElementById("trip-stops");
     // Both worked out server-side from the position we sent with the request.
-    const atIndex = data.at_stop_index;
-    const nextIndex = data.next_stop_index;
+    const atIndex = plain ? null : data.at_stop_index;
+    const nextIndex = plain ? null : data.next_stop_index;
 
     list.innerHTML = data.stops
       .map((s, i) => {
@@ -464,7 +546,7 @@
         } else if (i === nextIndex) {
           cls += " next";
           tag = ' <span class="tag">(next stop)</span>';
-        } else if (nextIndex === null || i < nextIndex) {
+        } else if (!plain && (nextIndex === null || i < nextIndex)) {
           // Everything behind the vehicle, or the whole trip once it's over.
           cls += " past";
         }
@@ -474,7 +556,7 @@
       .join("");
 
     // Nothing marked at all renders as a wall of grey, which reads like a bug.
-    if (nextIndex === null && data.stops.length) {
+    if (!plain && nextIndex === null && data.stops.length) {
       const last = data.stops[data.stops.length - 1];
       const note = document.createElement("div");
       note.className = "empty";
@@ -648,6 +730,7 @@
 
   function closeStop() {
     document.getElementById("stop").classList.remove("open");
+    sketchLayer.clearLayers();
   }
 
   function describeAway(a) {
@@ -680,7 +763,8 @@
     };
 
     const schedRow = (s) => `
-      <div class="sched${s.school ? " school" : ""}">
+      <div class="sched clickable${s.school ? " school" : ""}"
+           data-trip="${s.trip_id}" data-type="${s.type}" data-time="${s.time}">
         <span class="t">${formatTime(s.time)}</span>
         <span><span class="num">${s.route_short}</span><span class="to">${
           s.headsign || ""
@@ -701,8 +785,14 @@
     }
 
     // The timetable, which is the useful part when nothing is live.
+    const w = data.window || {};
     if (data.scheduled && data.scheduled.length) {
-      html += `<div class="group">Scheduled from here today</div>` + data.scheduled.map(schedRow).join("");
+      const heading = w.from || w.to
+        ? `Departures ${formatTime(w.from) || "start of day"} to ${formatTime(w.to) || "end of day"} (${data.scheduled.length}) - click to draw`
+        : "Scheduled from here today - click to draw";
+      html += `<div class="group">${heading}</div>` + data.scheduled.map(schedRow).join("");
+    } else if (w.from || w.to) {
+      html += '<div class="empty">Nothing scheduled from this stop in that window today.</div>';
     } else if (data.next_service_day) {
       const n = data.next_service_day;
       html +=
@@ -716,6 +806,110 @@
   }
 
   let currentStopId = null;
+  let currentStopData = null;
+
+  // Lines for every route leaving in the window, so you can see the spread.
+  // The one you pick is drawn properly on tripLayer over the top - ten routes
+  // in ten colours is a tangle nobody can read.
+  //
+  // Orange because it has to stand out against grey roads and green parks
+  // without being mistaken for a mode colour: bus blue, train red, tram green
+  // and ferry purple are all taken.
+  const SKETCH_COLOR = "#ff7f0e";
+  const sketchLayer = L.layerGroup().addTo(map);
+
+  function stopWindow() {
+    return {
+      from: document.getElementById("stop-from").value,
+      to: document.getElementById("stop-to").value,
+    };
+  }
+
+  async function sketchRoutes(departures) {
+    sketchLayer.clearLayers();
+    if (!document.getElementById("stop-draw").checked || !departures.length) return;
+
+    const byTrip = new Map(departures.map((d) => [d.trip_id, d]));
+    const ids = departures.map((d) => d.trip_id).join(",");
+    try {
+      const data = await (await fetch(`api/shapes?trip_ids=${encodeURIComponent(ids)}`)).json();
+      Object.entries(data.shapes).forEach(([tripId, points]) => {
+        if (!points || points.length < 2) return;
+        const departure = byTrip.get(tripId);
+
+        // White casing underneath, same as the focused route, so the line
+        // stays readable where it crosses dark map detail.
+        L.polyline(points, { color: "white", weight: 5, opacity: 0.7 }).addTo(sketchLayer);
+        L.polyline(points, { color: SKETCH_COLOR, weight: 3, opacity: 0.85 }).addTo(sketchLayer);
+
+        // Fewer and smaller than on a selected route - direction is the whole
+        // reason to look at these, but a dozen routes at eight arrows each
+        // would bury the map.
+        addDirectionArrows(points, SKETCH_COLOR, sketchLayer, 4, 13);
+
+        // A 3px line is a small target, so an invisible fat one catches the
+        // click. Clicking the line on the map is the obvious thing to try -
+        // it used to do nothing, and only the list rows worked.
+        L.polyline(points, { color: "transparent", weight: 14, opacity: 0 })
+          .addTo(sketchLayer)
+          .bindTooltip(
+            departure
+              ? `${departure.route_short} - ${departure.headsign || ""} (${formatTime(departure.time)})`
+              : "route",
+            { sticky: true }
+          )
+          .on("click", () => {
+            if (departure) {
+              showScheduledTrip(departure.trip_id, departure.type, departure.time);
+            }
+          });
+      });
+    } catch (err) {
+      console.error("Sketching routes failed:", err);
+    }
+  }
+
+  // Picking a scheduled route swaps the panel over to just that route and its
+  // stops. Everything else goes away, and "Back to stop" brings it all back -
+  // easier to read than one panel trying to show a stop and a route at once.
+  async function showScheduledTrip(tripId, type, departureTime) {
+    const panel = document.getElementById("trip");
+    const color = TYPE_COLORS[normaliseType(type)];
+
+    cameFromStop = currentStopId;
+    closeStop();
+    panel.classList.add("open");
+    panel.querySelector(".head").style.borderLeftColor = color;
+    document.getElementById("trip-back").style.display = "inline-block";
+    document.getElementById("trip-route").textContent = "Loading route...";
+    document.getElementById("trip-sub").textContent = "";
+    document.getElementById("trip-meta").textContent = "";
+    document.getElementById("trip-stops").innerHTML = "";
+
+    try {
+      const response = await fetch(`api/trip/${encodeURIComponent(tripId)}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+
+      document.getElementById("trip-route").innerHTML =
+        `<span class="badge" style="background:${color}">${data.route_short}</span>${data.route_name}`;
+      document.getElementById("trip-sub").textContent = data.headsign
+        ? `Towards ${data.headsign}`
+        : `Route ${data.route_id}`;
+      document.getElementById("trip-meta").textContent =
+        `Scheduled ${formatTime(departureTime || data.stops[0].departure)} - ${data.stops.length} stops`;
+
+      // plain: no vehicle, so nothing is "at" or "next" - just the timetable.
+      renderStops(data, true, true);
+      drawTripLine(data, color);
+      if (tripBounds) map.fitBounds(tripBounds, { padding: [40, 40] });
+    } catch (err) {
+      console.error("Drawing route failed:", err);
+      document.getElementById("trip-route").textContent = "Route unavailable";
+      document.getElementById("trip-stops").innerHTML =
+        '<div class="empty">Could not load that route.</div>';
+    }
+  }
 
   async function showStop(stopId) {
     closeTrip();
@@ -729,7 +923,13 @@
     document.getElementById("stop-arrivals").innerHTML = "";
 
     try {
-      const response = await fetch(`api/stop/${encodeURIComponent(stopId)}`);
+      const chosen = stopWindow();
+      const query = new URLSearchParams();
+      if (chosen.from) query.set("from_time", chosen.from);
+      if (chosen.to) query.set("to_time", chosen.to);
+      const suffix = query.toString() ? `?${query}` : "";
+
+      const response = await fetch(`api/stop/${encodeURIComponent(stopId)}${suffix}`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
 
@@ -758,11 +958,13 @@
             }, school days only</div>` + `<div class="chips">${school.map(chip).join("")}</div>`
           : "");
 
+      currentStopData = data;
       const inbound = data.approaching.filter((a) => a.inbound).length;
       document.getElementById("stop-meta").textContent =
         `Stop ${data.stop.code || data.stop.stop_id} - ${inbound} vehicle${inbound === 1 ? "" : "s"} heading here now`;
 
       renderArrivals(data);
+      sketchRoutes(data.scheduled);
     } catch (err) {
       console.error("Stop lookup failed:", err);
       document.getElementById("stop-name").textContent = "Stop unavailable";
@@ -773,12 +975,34 @@
 
   document.getElementById("stop-close").addEventListener("click", closeStop);
 
-  // Delegated, because the arrivals list is rebuilt on every stop lookup.
+  // Delegated, because both lists are rebuilt on every stop lookup.
   document.getElementById("stop-arrivals").addEventListener("click", (event) => {
-    const row = event.target.closest(".arrival.clickable");
-    if (!row) return;
-    const entry = markers.get(row.dataset.key);
-    if (entry) showTrip(entry.vehicle, false, currentStopId);
+    const live = event.target.closest(".arrival.clickable");
+    if (live) {
+      const entry = markers.get(live.dataset.key);
+      if (entry) showTrip(entry.vehicle, false, currentStopId);
+      return;
+    }
+    // A scheduled departure has no vehicle yet, so show the route on its own.
+    const scheduled = event.target.closest(".sched.clickable");
+    if (scheduled) {
+      showScheduledTrip(scheduled.dataset.trip, scheduled.dataset.type, scheduled.dataset.time);
+    }
+  });
+
+  function applyWindow() {
+    if (currentStopId) showStop(currentStopId);
+  }
+
+  document.getElementById("stop-from").addEventListener("change", applyWindow);
+  document.getElementById("stop-to").addEventListener("change", applyWindow);
+  document.getElementById("stop-draw").addEventListener("change", () => {
+    if (currentStopData) sketchRoutes(currentStopData.scheduled);
+  });
+  document.getElementById("stop-now").addEventListener("click", () => {
+    document.getElementById("stop-from").value = "";
+    document.getElementById("stop-to").value = "";
+    applyWindow();
   });
 
   document.getElementById("trip-back").addEventListener("click", () => {
