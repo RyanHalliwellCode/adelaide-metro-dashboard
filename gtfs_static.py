@@ -12,6 +12,7 @@ import sqlite3
 import urllib.request
 import zipfile
 
+import db
 from db import DB_PATH
 
 STATIC_URL = "https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip"
@@ -91,6 +92,9 @@ def build(force_download: bool = False) -> None:
             f'CREATE INDEX IF NOT EXISTS "idx_{table}_{column}" ON "{table}" ("{column}")'
         )
     conn.commit()
+
+    # Derived from the tables just loaded, so it has to be rebuilt with them.
+    print(f"  {'stop_modes (derived)':22s} {db.build_stop_modes(conn):>9,} rows")
 
     version = conn.execute(
         "SELECT feed_start_date, feed_end_date, feed_version FROM feed_info"

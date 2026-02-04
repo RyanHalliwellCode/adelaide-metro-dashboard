@@ -74,6 +74,53 @@ def services_on(conn: sqlite3.Connection, day: date) -> set[str]:
     return active
 
 
+# --- Which modes serve each stop ---------------------------------------------
+# Worked out once and stored, because doing it per map pan costs 300 ms+ and
+# the answer only changes when the timetable does. Platforms are rolled up into
+# their parent station, so a station knows it's served by trains even though
+# only its platforms carry the stop_times.
+
+STOP_MODES_SQL = """
+DROP TABLE IF EXISTS stop_modes;
+CREATE TABLE stop_modes (stop_id TEXT PRIMARY KEY, modes TEXT);
+"""
+
+
+def build_stop_modes(conn: sqlite3.Connection) -> int:
+    conn.executescript(STOP_MODES_SQL)
+    rows = conn.execute(
+        """SELECT COALESCE(NULLIF(s.parent_station,''), s.stop_id) AS anchor, r.route_type
+           FROM stop_times st
+           JOIN stops s ON s.stop_id = st.stop_id
+           JOIN trips t ON t.trip_id = st.trip_id
+           JOIN routes r ON r.route_id = t.route_id
+           GROUP BY anchor, r.route_type"""
+    ).fetchall()
+
+    grouped: dict[str, set] = {}
+    for anchor, route_type in rows:
+        grouped.setdefault(anchor, set()).add(gtfs_type_name(route_type))
+    conn.executemany(
+        "INSERT OR REPLACE INTO stop_modes (stop_id, modes) VALUES (?, ?)",
+        [(stop_id, ",".join(sorted(modes))) for stop_id, modes in grouped.items()],
+    )
+    conn.commit()
+    return len(grouped)
+
+
+def ensure_stop_modes() -> None:
+    """Build the lookup if this database predates it."""
+    with connect(writable=True) as conn:
+        exists = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='stop_modes'"
+        ).fetchone()
+        if exists:
+            return
+        print("Building stop_modes lookup (one-off, a couple of seconds)...", flush=True)
+        count = build_stop_modes(conn)
+        print(f"stop_modes: {count:,} stops classified", flush=True)
+
+
 # --- Recorded live positions -------------------------------------------------
 # The realtime feed used to be written to a JSON file that went stale the moment
 # it was created. Positions now land in the same database as the timetable, so

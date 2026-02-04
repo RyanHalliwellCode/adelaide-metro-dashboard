@@ -693,13 +693,22 @@
 
       stopsLayer.clearLayers();
       data.stops.forEach((s) => {
+        // Colour and size by what serves the stop. A railway station and a bus
+        // interchange can sit 50 m apart - Elizabeth's are - and identical
+        // white dots give you no way to tell which one you're clicking.
+        const modes = s.modes || [];
+        const primary =
+          ["train", "tram", "ferry"].find((m) => modes.includes(m)) || "bus";
+        const isStation = primary !== "bus";
+
         L.circleMarker([s.latitude, s.longitude], {
-          radius: 4,
-          color: "#444",
-          weight: 1,
-          fillColor: "#fff",
+          radius: isStation ? 7 : 4,
+          color: isStation ? "#222" : "#444",
+          weight: isStation ? 2 : 1,
+          fillColor: modes.length ? TYPE_COLORS[primary] : "#fff",
           fillOpacity: 1,
         })
+          .bindTooltip(s.name, { direction: "top" })
           .on("click", () => showStop(s.stop_id))
           .addTo(stopsLayer);
       });

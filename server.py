@@ -139,6 +139,7 @@ async def lifespan(app: FastAPI):
     # server still starts but every data endpoint says why it can't help.
     try:
         app.state.route_types = db.route_types()
+        db.ensure_stop_modes()
         db.prepare_recorder()
         recording = True
     except db.MissingDatabase as exc:
@@ -380,12 +381,28 @@ def normalise_time(value: str | None) -> str | None:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
+def platforms_of(conn, stop_id: str) -> list[str]:
+    """
+    The stop itself plus any platforms grouped under it.
+
+    A station like Elizabeth is three records: one platform towards the city,
+    one towards Gawler, and a parent that holds no departures at all. Clicking
+    the parent has to answer for the whole station or it looks broken.
+    """
+    children = [
+        row[0]
+        for row in conn.execute("SELECT stop_id FROM stops WHERE parent_station = ?", (stop_id,))
+    ]
+    return [stop_id, *children]
+
+
 def departures_at(
-    conn, stop_id: str, services: set[str], after: str, limit: int, before: str | None = None
+    conn, stop_ids: list[str], services: set[str], after: str, limit: int, before: str | None = None
 ) -> list[dict]:
     if not services:
         return []
     marks = ",".join("?" * len(services))
+    stop_marks = ",".join("?" * len(stop_ids))
     window = "AND t < ?" if before else ""
     rows = conn.execute(
         f"""SELECT COALESCE(NULLIF(st.departure_time,''), st.arrival_time) AS t,
@@ -393,9 +410,9 @@ def departures_at(
             FROM stop_times st
             JOIN trips t2 ON t2.trip_id = st.trip_id
             JOIN routes r ON r.route_id = t2.route_id
-            WHERE st.stop_id = ? AND t2.service_id IN ({marks}) AND t >= ? {window}
+            WHERE st.stop_id IN ({stop_marks}) AND t2.service_id IN ({marks}) AND t >= ? {window}
             ORDER BY t LIMIT ?""",
-        (stop_id, *services, after, *( [before] if before else [] ), limit),
+        (*stop_ids, *services, after, *([before] if before else []), limit),
     ).fetchall()
     return [
         {
@@ -411,18 +428,19 @@ def departures_at(
     ]
 
 
-def approaching_vehicles(conn, stop_id: str, target: tuple, vehicles: list[dict], short_names: dict) -> list[dict]:
+def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: list[dict], short_names: dict) -> list[dict]:
     """Live vehicles on a trip that calls at this stop, and how far off they are."""
     by_trip = {v["trip_id"]: v for v in vehicles if v.get("trip_id")}
     if not by_trip:
         return []
 
     marks = ",".join("?" * len(by_trip))
+    stop_marks = ",".join("?" * len(stop_ids))
     calls = conn.execute(
         f"""SELECT st.trip_id, st.stop_sequence, st.arrival_time, st.departure_time
             FROM stop_times st
-            WHERE st.stop_id = ? AND st.trip_id IN ({marks})""",
-        (stop_id, *by_trip),
+            WHERE st.stop_id IN ({stop_marks}) AND st.trip_id IN ({marks})""",
+        (*stop_ids, *by_trip),
     ).fetchall()
     if not calls:
         return []
@@ -484,10 +502,15 @@ def api_stops(south: float, west: float, north: float, east: float, limit: int =
     """Stops inside the current map view. All 9,167 at once is unusable."""
     conn = open_db()
     try:
+        # Platforms are excluded in favour of the station that groups them.
+        # Elizabeth's two platforms sit 60 m apart and would just stack on the
+        # map; the station answers for both directions anyway.
         rows = conn.execute(
-            """SELECT stop_id, stop_code, stop_name, stop_lat, stop_lon FROM stops
-               WHERE CAST(stop_lat AS REAL) BETWEEN ? AND ?
-                 AND CAST(stop_lon AS REAL) BETWEEN ? AND ?
+            """SELECT s.stop_id, s.stop_code, s.stop_name, s.stop_lat, s.stop_lon, m.modes
+               FROM stops s LEFT JOIN stop_modes m ON m.stop_id = s.stop_id
+               WHERE s.parent_station = ''
+                 AND CAST(s.stop_lat AS REAL) BETWEEN ? AND ?
+                 AND CAST(s.stop_lon AS REAL) BETWEEN ? AND ?
                LIMIT ?""",
             (south, north, west, east, limit + 1),
         ).fetchall()
@@ -496,8 +519,15 @@ def api_stops(south: float, west: float, north: float, east: float, limit: int =
 
     return {
         "stops": [
-            {"stop_id": sid, "code": code, "name": name, "latitude": float(lat), "longitude": float(lon)}
-            for sid, code, name, lat, lon in rows[:limit]
+            {
+                "stop_id": sid,
+                "code": code,
+                "name": name,
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "modes": modes.split(",") if modes else [],
+            }
+            for sid, code, name, lat, lon, modes in rows[:limit]
         ],
         "truncated": len(rows) > limit,
     }
@@ -529,24 +559,26 @@ def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = N
         if not stop:
             raise HTTPException(404, f"stop {stop_id} not found")
         target = (float(stop[3]), float(stop[4]))
+        stop_ids = platforms_of(conn, stop_id)
+        stop_marks = ",".join("?" * len(stop_ids))
 
         # Trip count matters here: a stop can list a route that only calls once
         # a day. Adelaide's school services do exactly that, which is why this
         # list is longer than the one a journey planner shows.
         routes = conn.execute(
-            """SELECT r.route_id, r.route_long_name, r.route_short_name, r.route_type,
-                      COUNT(DISTINCT t.trip_id) AS trips
-               FROM stop_times st
-               JOIN trips t ON t.trip_id = st.trip_id
-               JOIN routes r ON r.route_id = t.route_id
-               WHERE st.stop_id = ?
-               GROUP BY r.route_id
-               ORDER BY trips DESC, r.route_id""",
-            (stop_id,),
+            f"""SELECT r.route_id, r.route_long_name, r.route_short_name, r.route_type,
+                       COUNT(DISTINCT t.trip_id) AS trips
+                FROM stop_times st
+                JOIN trips t ON t.trip_id = st.trip_id
+                JOIN routes r ON r.route_id = t.route_id
+                WHERE st.stop_id IN ({stop_marks})
+                GROUP BY r.route_id
+                ORDER BY trips DESC, r.route_id""",
+            stop_ids,
         ).fetchall()
         short_names = {rid: (short or rid) for rid, _long, short, _type, _n in routes}
 
-        approaching = approaching_vehicles(conn, stop_id, target, cache.vehicles, short_names)
+        approaching = approaching_vehicles(conn, stop_ids, target, cache.vehicles, short_names)
 
         # The timetable side. Matters most on a quiet stop, where "no live
         # vehicle is coming" tells you nothing about when one actually will.
@@ -558,10 +590,10 @@ def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = N
             # An explicit window can hold a lot more than the next few, and the
             # point is to see everything in it.
             scheduled = departures_at(
-                conn, stop_id, today_services, window_from or "00:00:00", 60, window_to
+                conn, stop_ids, today_services, window_from or "00:00:00", 60, window_to
             )
         else:
-            scheduled = departures_at(conn, stop_id, today_services, now, 12)
+            scheduled = departures_at(conn, stop_ids, today_services, now, 12)
 
         # Nothing left today, so say which day it next runs rather than leaving
         # a school-only stop looking dead. Only when browsing from now - an
@@ -570,7 +602,7 @@ def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = N
         if not scheduled and not (window_from or window_to):
             for offset in range(1, 8):
                 day = today + timedelta(days=offset)
-                later = departures_at(conn, stop_id, db.services_on(conn, day), "00:00:00", 6)
+                later = departures_at(conn, stop_ids, db.services_on(conn, day), "00:00:00", 6)
                 if later:
                     next_day = {
                         "date": day.isoformat(),
