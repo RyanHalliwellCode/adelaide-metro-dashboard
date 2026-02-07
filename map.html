@@ -162,6 +162,24 @@
   .side-panel .tag.at { color: #3c763d; }
   .side-panel .empty { padding: 12px; color: #888; }
 
+  /* Disruption notices. */
+  .side-panel .alert {
+    margin: 6px 12px 0;
+    padding: 6px 8px;
+    background: #fdf3e3;
+    border-left: 3px solid #e08a1e;
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .side-panel .alert .title { font-weight: 600; color: #8a5a10; }
+  .side-panel .alert .body { color: #6b5638; margin-top: 2px; }
+  .side-panel .alert .when { color: #9a7f5a; margin-top: 3px; font-size: 11px; }
+  .alert-pin { background: none; border: none; }
+  .side-panel .alert a { color: #1c6cb4; }
+  .legend .alerts { margin-top: 4px; font-size: 12px; }
+  .legend .alerts a { color: #b06a00; cursor: pointer; text-decoration: underline; }
+
   /* Leaflet gives divIcons a white box and border by default. */
   .route-arrow { background: none; border: none; }
 
@@ -247,6 +265,11 @@
     margin-right: 5px;
   }
   .side-panel .arrival .detail { color: #666; font-size: 12px; }
+  .side-panel .arrival .notes { color: #4a7c59; font-style: italic; }
+  /* Predicted time beside the scheduled one, coloured by which way it slipped. */
+  .side-panel .pred { font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .side-panel .pred.late { color: #c0392b; }
+  .side-panel .pred.early { color: #1c6cb4; }
   .side-panel .arrival.gone { opacity: 0.45; }
   .side-panel .group {
     padding: 8px 12px 2px;
@@ -284,7 +307,7 @@
     <div class="route" id="stop-name"></div>
     <div class="sub" id="stop-routes"></div>
     <div class="meta" id="stop-meta"></div>
-    <div class="window">
+    <div class="window" id="stop-window">
       <label>From <input type="time" id="stop-from"></label>
       <label>to <input type="time" id="stop-to"></label>
       <span class="zoom" id="stop-now">now</span>
@@ -401,9 +424,80 @@
     }
   }
 
+  // Network-wide disruptions, shown as a count in the control panel. Clicking
+  // it opens the full list in the side panel.
+  let networkAlerts = [];
+
+  // Pins for the disruptions we could tie to a real stop. The feed gives only
+  // affected routes, so the server matches the stop named in the headline
+  // against the timetable - about half of them can be placed.
+  const alertLayer = L.layerGroup();
+
+  function drawAlertPins() {
+    alertLayer.clearLayers();
+    networkAlerts.forEach((a) => {
+      (a.stops || []).forEach((s) => {
+        L.marker([s.latitude, s.longitude], {
+          icon: L.divIcon({
+            className: "alert-pin",
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            html:
+              '<svg width="20" height="20" viewBox="0 0 20 20">' +
+              '<path d="M10 2 L19 18 L1 18 Z" fill="#e08a1e" stroke="white" stroke-width="1.6"' +
+              ' stroke-linejoin="round"/><text x="10" y="16" text-anchor="middle"' +
+              ' font-size="11" font-weight="700" fill="white">!</text></svg>',
+          }),
+        })
+          .bindTooltip(`${a.header}<br><i>${s.name}</i>`)
+          .addTo(alertLayer);
+      });
+    });
+  }
+
+  async function loadAlerts() {
+    try {
+      const data = await (await fetch("api/alerts")).json();
+      networkAlerts = data.alerts || [];
+      const el = document.getElementById("alert-summary");
+      if (el && networkAlerts.length) {
+        const pinned = data.mapped || 0;
+        el.innerHTML =
+          `<a id="alert-open">${networkAlerts.length} disruptions</a>` +
+          ` - ${pinned} on the map` +
+          (data.upcoming && data.upcoming.length
+            ? `, ${data.upcoming.length} starting later`
+            : "");
+      }
+      drawAlertPins();
+    } catch (err) {
+      console.error("Loading alerts failed:", err);
+    }
+  }
+
+  function showAllAlerts() {
+    closeTrip();
+    const panel = document.getElementById("stop");
+    currentStopId = null;
+    panel.classList.add("open");
+    panel.querySelector(".head").style.borderLeftColor = "#e08a1e";
+    // No departures here, so no time window or route sketching either.
+    document.getElementById("stop-window").style.display = "none";
+    document.getElementById("stop-name").textContent = "Network disruptions";
+    document.getElementById("stop-routes").innerHTML = "";
+    document.getElementById("stop-meta").textContent =
+      `${networkAlerts.length} notices currently in force`;
+    document.getElementById("stop-arrivals").innerHTML = renderAlerts(networkAlerts, 50);
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target.id === "alert-open") showAllAlerts();
+  });
+
   // Panel goes up first so there is somewhere to report progress and errors.
   addFilterPanel();
   firstRender();
+  loadAlerts();
 
   // --- Trip panel ----------------------------------------------------------
 
@@ -551,7 +645,16 @@
           cls += " past";
         }
         const time = formatTime(s.arrival || s.departure);
-        return `<div class="${cls}"><span class="t">${time}</span><span>${s.name}${tag}</span></div>`;
+        // Show the predicted time next to the scheduled one when they differ,
+        // so you can see the timetable slipping stop by stop.
+        let predicted = "";
+        if (s.predicted && s.predicted_delay !== null && Math.abs(s.predicted_delay) >= 2) {
+          const late = s.predicted_delay > 0;
+          predicted =
+            ` <span class="pred ${late ? "late" : "early"}">${formatTime(s.predicted)}` +
+            ` (${late ? "+" : ""}${s.predicted_delay})</span>`;
+        }
+        return `<div class="${cls}"><span class="t">${time}</span><span>${s.name}${tag}${predicted}</span></div>`;
       })
       .join("");
 
@@ -622,6 +725,11 @@
         : `Route ${data.route_id}`;
 
       renderStops(data, !quiet);
+      if (data.alerts && data.alerts.length) {
+        document
+          .getElementById("trip-stops")
+          .insertAdjacentHTML("afterbegin", renderAlerts(data.alerts, 2));
+      }
       drawTripLine(data, color);
 
       // speed is metres per second in the feed, which means nothing to anyone.
@@ -637,9 +745,19 @@
 
       const late = data.delay_minutes;
       if (late !== null) {
-        if (late >= 2) bits.push(`${late} min late`);
-        else if (late <= -2) bits.push(`${Math.abs(late)} min early`);
-        else bits.push("on time");
+        // Say when it's the operator's figure rather than our own guess.
+        const source = data.delay_source === "predicted" ? " (predicted)" : "";
+        if (late >= 2) bits.push(`${late} min late${source}`);
+        else if (late <= -2) bits.push(`${Math.abs(late)} min early${source}`);
+        else bits.push(`on time${source}`);
+      }
+
+      if (v.occupancy_text) bits.push(v.occupancy_text);
+      if (v.wheelchair === true) bits.push("wheelchair accessible");
+      else if (v.wheelchair === false) bits.push("no wheelchair access");
+      if (v.air_conditioned === true) bits.push("air conditioned");
+      if (v.schedule_relationship && v.schedule_relationship !== "SCHEDULED") {
+        bits.push(v.schedule_relationship.toLowerCase());
       }
       document.getElementById("trip-meta").textContent = bits.join(" - ");
     } catch (err) {
@@ -742,6 +860,47 @@
     sketchLayer.clearLayers();
   }
 
+  // Disruptions are long and written for a web page, so show the headline and
+  // trim the body - the full text is a click away on the operator's site.
+  function shortDate(epoch) {
+    if (!epoch) return null;
+    return new Date(epoch * 1000).toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function renderAlerts(alerts, limit = 4) {
+    if (!alerts || !alerts.length) return "";
+    const shown = alerts.slice(0, limit);
+    const rows = shown
+      .map((a) => {
+        const body = a.description && a.description.length > 190
+          ? `${a.description.slice(0, 190)}...`
+          : a.description || "";
+        const link = a.url
+          ? ` <a href="${a.url}" target="_blank" rel="noopener">details</a>`
+          : "";
+        // Several of these have been in force for over a year, so say since when.
+        const from = shortDate(a.starts);
+        const to = shortDate(a.ends);
+        const when = from
+          ? `In force since ${from}${to ? `, until ${to}` : " (no end date given)"}`
+          : to
+          ? `Until ${to}`
+          : "";
+        return `<div class="alert"><div class="title">${a.header}</div>
+                  <div class="body">${body}${link}</div>
+                  ${when ? `<div class="when">${when}</div>` : ""}</div>`;
+      })
+      .join("");
+    const more = alerts.length > limit
+      ? `<div class="alert"><div class="body">and ${alerts.length - limit} more</div></div>`
+      : "";
+    return `<div class="group">Disruptions (${alerts.length})</div>${rows}${more}`;
+  }
+
   function describeAway(a) {
     if (!a.inbound) return "been past";
     if (a.stops_away === 0) return "at stop";
@@ -753,6 +912,19 @@
     const inbound = data.approaching.filter((a) => a.inbound);
     const past = data.approaching.filter((a) => !a.inbound);
 
+    // Extras the feed sends per vehicle that we used to throw away.
+    const vehicleNotes = (a) => {
+      const notes = [];
+      if (a.occupancy_text) notes.push(a.occupancy_text);
+      if (a.wheelchair === true) notes.push("wheelchair accessible");
+      else if (a.wheelchair === false) notes.push("not wheelchair accessible");
+      if (a.air_conditioned === true) notes.push("air conditioned");
+      if (a.schedule_relationship && a.schedule_relationship !== "SCHEDULED") {
+        notes.push(a.schedule_relationship.toLowerCase());
+      }
+      return notes;
+    };
+
     const row = (a) => {
       const color = TYPE_COLORS[a.type] || TYPE_COLORS.unknown;
       const km = a.distance_m >= 1000
@@ -760,13 +932,32 @@
         : `${a.distance_m} m`;
       // Only vehicles we still have a marker for can be opened and highlighted.
       const clickable = markers.has(a.vehicle_id) ? " clickable" : "";
+
+      // The operator's own prediction beats counting stops, when they give one.
+      let when = describeAway(a);
+      if (a.inbound && a.minutes_away !== null && a.minutes_away !== undefined) {
+        when = a.minutes_away <= 0 ? "due now" : `${a.minutes_away} min`;
+      }
+
+      const bits = [`${km} away`];
+      if (a.predicted) {
+        bits.push(`expected ${formatTime(a.predicted)}`);
+        if (a.predicted_delay >= 2) bits.push(`${a.predicted_delay} min late`);
+        else if (a.predicted_delay <= -2) bits.push(`${Math.abs(a.predicted_delay)} min early`);
+      } else {
+        bits.push(`due ${formatTime(a.due)}`);
+      }
+      bits.push(`vehicle ${a.vehicle_id}`);
+      const notes = vehicleNotes(a);
+
       return `
         <div class="arrival${a.inbound ? "" : " gone"}${clickable}" data-key="${a.vehicle_id}">
-          <span class="away">${describeAway(a)}</span>
+          <span class="away">${when}</span>
           <span>
             <span class="dot" style="background:${color}"></span><b>${a.route_short || a.route_id}</b>
             ${a.headsign ? `to ${a.headsign}` : ""}
-            <div class="detail">${km} away - due ${formatTime(a.due)} - vehicle ${a.vehicle_id}</div>
+            <div class="detail">${bits.join(" - ")}</div>
+            ${notes.length ? `<div class="detail notes">${notes.join(" &middot; ")}</div>` : ""}
           </span>
         </div>`;
     };
@@ -780,7 +971,9 @@
         }${s.school ? " (school)" : ""}</span></span>
       </div>`;
 
-    let html = "";
+    // Disruptions first - no point reading arrival times for a stop that has
+    // been moved 30 metres up the road.
+    let html = renderAlerts(data.alerts);
 
     if (data.approaching.length) {
       html +=
@@ -924,6 +1117,8 @@
     closeTrip();
     currentStopId = stopId;
     const panel = document.getElementById("stop");
+    // The panel is shared with the disruptions list, which has no timetable.
+    document.getElementById("stop-window").style.display = "";
     panel.classList.add("open");
     panel.querySelector(".head").style.borderLeftColor = "#444";
     document.getElementById("stop-name").textContent = "Loading stop...";
@@ -1182,6 +1377,13 @@
              Show stops
            </label>
            <div class="status" id="stops-hint"></div>
+         </div>
+         <div class="live">
+           <label>
+             <input type="checkbox" id="alert-toggle">
+             Show disruptions
+           </label>
+           <div class="alerts" id="alert-summary"></div>
          </div>`;
 
       // Stops checkbox clicks from panning the map underneath.
@@ -1205,6 +1407,11 @@
       div
         .querySelector("#stops-toggle")
         .addEventListener("change", (event) => setStopsMode(event.target.checked));
+
+      div.querySelector("#alert-toggle").addEventListener("change", (event) => {
+        if (event.target.checked) alertLayer.addTo(map);
+        else map.removeLayer(alertLayer);
+      });
 
       return div;
     };

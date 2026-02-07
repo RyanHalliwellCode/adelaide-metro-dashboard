@@ -13,6 +13,7 @@ then open http://127.0.0.1:8000/
 
 import asyncio
 import math
+import re
 import time
 from contextlib import asynccontextmanager, suppress
 from datetime import date, datetime, timedelta, timezone
@@ -22,12 +23,28 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
 import db
-from main import fetch_debug_text, parse_feed_timestamp, parse_vehicles
+from main import (
+    SERVICE_ALERTS_URL,
+    TRIP_UPDATES_URL,
+    fetch_debug_text,
+    parse_alerts,
+    parse_feed_timestamp,
+    parse_trip_updates,
+    parse_vehicles,
+)
 
 BASE_DIR = Path(__file__).parent
 
 # The feed only republishes every ~15s, so polling faster is wasted bandwidth.
 POLL_INTERVAL_SECONDS = 15
+
+# Predictions are a 1.5 MB download and they shift slowly, so they get their own
+# slower cycle rather than riding along with the 220 KB position feed.
+PREDICTION_INTERVAL_SECONDS = 30
+
+# Disruptions are written by hand and last for weeks, so there is no point
+# checking them often.
+ALERT_INTERVAL_SECONDS = 300
 
 # Stop hammering the feed when nobody's watching. Every 15s round the clock is
 # ~5,700 requests and well over a gigabyte a day, almost all of it for an empty
@@ -51,6 +68,47 @@ class FeedCache:
         self.error: str | None = None
         # Starts "active" so the first poll runs before anyone opens the page.
         self.last_request_at: float = time.monotonic()
+        # trip_id -> stop_id -> predicted arrival (unix seconds).
+        self.predictions: dict[str, dict[str, int]] = {}
+        self.predictions_at: float | None = None
+        self.alerts: list[dict] = []
+        self.alerts_at: float | None = None
+
+    def predictions_due(self) -> bool:
+        return (
+            self.predictions_at is None
+            or (time.monotonic() - self.predictions_at) >= PREDICTION_INTERVAL_SECONDS
+        )
+
+    def alerts_due(self) -> bool:
+        return (
+            self.alerts_at is None
+            or (time.monotonic() - self.alerts_at) >= ALERT_INTERVAL_SECONDS
+        )
+
+    def active_alerts(self) -> list[dict]:
+        """
+        In force right now. Ten of the sixty published alerts have a start date
+        in the future - roadworks announced ahead of time - so filtering only on
+        the end date advertises disruptions that haven't begun.
+        """
+        now = time.time()
+        return [
+            a
+            for a in self.alerts
+            if (not a["starts"] or a["starts"] <= now) and (not a["ends"] or a["ends"] > now)
+        ]
+
+    def alerts_for(self, route_ids: set[str]) -> list[dict]:
+        """Alerts naming any of these routes, plus any that name none at all."""
+        return [
+            a
+            for a in self.active_alerts()
+            if not a["routes"] or route_ids.intersection(a["routes"])
+        ]
+
+    def predicted_arrival(self, trip_id: str, stop_id: str) -> int | None:
+        return self.predictions.get(trip_id, {}).get(stop_id)
 
     def touch(self) -> None:
         self.last_request_at = time.monotonic()
@@ -117,6 +175,32 @@ async def poll_feed(cache: FeedCache, route_types: dict[str, str], recording: bo
             # Keep the old snapshot - stale positions beat a blank map.
             cache.error = f"{type(exc).__name__}: {exc}"
             print(f"Feed poll failed: {cache.error}", flush=True)
+
+        # Predictions are a bonus on top of positions, so a failure here leaves
+        # the map working with whatever it had.
+        if cache.predictions_due():
+            try:
+                text = await asyncio.to_thread(fetch_debug_text, TRIP_UPDATES_URL)
+                cache.predictions = parse_trip_updates(text)
+                cache.predictions_at = time.monotonic()
+                print(f"Polled predictions: {len(cache.predictions)} trips", flush=True)
+            except Exception as exc:
+                print(f"Prediction poll failed: {type(exc).__name__}: {exc}", flush=True)
+
+        if cache.alerts_due():
+            try:
+                text = await asyncio.to_thread(fetch_debug_text, SERVICE_ALERTS_URL)
+                alerts = parse_alerts(text)
+                await asyncio.to_thread(locate_alerts, alerts)
+                cache.alerts = alerts
+                cache.alerts_at = time.monotonic()
+                mapped = sum(1 for a in alerts if a["stops"])
+                print(
+                    f"Polled alerts: {len(alerts)} disruptions, {mapped} pinned to a stop",
+                    flush=True,
+                )
+            except Exception as exc:
+                print(f"Alert poll failed: {type(exc).__name__}: {exc}", flush=True)
 
         # Recording is history, not the live map, so its own try/except - a
         # write failure must never stop positions being served.
@@ -245,6 +329,112 @@ def to_seconds(value: str | None) -> int | None:
     return hours * 3600 + minutes * 60 + seconds
 
 
+# Alert headlines name the stop they concern - "Stop U1 Halifax Street" - but
+# the feed gives no coordinates, only affected routes. Pulling the stop code out
+# of the text and matching it against the timetable is what puts them on a map.
+ALERT_STOP_TOKEN_RE = re.compile(r"\bStop ([0-9]+[A-Z]?|[A-Z]{1,2}[0-9]+[A-Z]?)\b")
+
+# Stop names abbreviate; headlines spell it out.
+STREET_ABBREVIATIONS = {
+    "road": "rd", "street": "st", "highway": "hwy", "avenue": "av", "drive": "dr",
+    "terrace": "tce", "parade": "pde", "crescent": "cr", "boulevard": "blvd",
+    "place": "pl", "court": "ct", "esplanade": "esp", "circuit": "cct", "lane": "la",
+}
+HEADLINE_NOISE = {
+    "stop", "stops", "closure", "closures", "change", "changes", "detour", "detours",
+    "and", "temporary", "relocation", "side", "north", "south", "east", "west",
+    "bus", "service", "services", "from", "the", "until", "further", "notice",
+}
+
+
+def headline_streets(header: str) -> list[str]:
+    """Words from a headline that might name a street, in stop-name spelling."""
+    head = ALERT_STOP_TOKEN_RE.sub(" ", header.split(" - From ")[0])
+    words = re.findall(r"[A-Za-z]+", head.lower())
+    return [
+        STREET_ABBREVIATIONS.get(w, w)
+        for w in words
+        if w not in HEADLINE_NOISE and len(w) > 2
+    ]
+
+
+def locate_alerts(alerts: list[dict]) -> None:
+    """
+    Attach coordinates to alerts we can pin to a stop, in place.
+
+    Stop numbers repeat across the network - there are many "Stop 2" - so a
+    candidate only counts if its street also appears in the headline. Without
+    that check "Stop 2 South Road" matches a stop on Sir Edwin Smith Ave.
+    """
+    try:
+        conn = db.connect()
+    except db.MissingDatabase:
+        return
+
+    try:
+        for alert in alerts:
+            alert["stops"] = []
+            tokens = set(ALERT_STOP_TOKEN_RE.findall(alert["header"]))
+            if not tokens or not alert["routes"]:
+                continue
+
+            streets = headline_streets(alert["header"])
+            marks = ",".join("?" * len(alert["routes"]))
+            found = {}
+            for token in tokens:
+                rows = conn.execute(
+                    f"""SELECT DISTINCT s.stop_id, s.stop_name, s.stop_lat, s.stop_lon
+                        FROM stops s
+                        JOIN stop_times st ON st.stop_id = s.stop_id
+                        JOIN trips t ON t.trip_id = st.trip_id
+                        WHERE t.route_id IN ({marks}) AND s.stop_name LIKE ?""",
+                    (*alert["routes"], f"Stop {token} %"),
+                ).fetchall()
+                for stop_id, name, lat, lon in rows:
+                    if any(word in name.lower() for word in streets):
+                        found[stop_id] = {
+                            "stop_id": stop_id,
+                            "name": name,
+                            "latitude": float(lat),
+                            "longitude": float(lon),
+                        }
+            alert["stops"] = list(found.values())
+    finally:
+        conn.close()
+
+
+def describe_prediction(epoch: int | None, scheduled: str | None) -> dict:
+    """
+    Turn a predicted unix timestamp into what the panel needs: a clock time,
+    minutes from now, and how far off the timetable it is.
+    """
+    if not epoch:
+        return {"predicted": None, "minutes_away": None, "predicted_delay": None}
+
+    when = datetime.fromtimestamp(epoch)
+    minutes_away = round((epoch - time.time()) / 60)
+
+    predicted_delay = None
+    due = to_seconds(scheduled)
+    if due is not None:
+        # GTFS writes after-midnight as 24:xx, so compare inside one day's
+        # seconds rather than trying to build a real datetime from it.
+        actual = when.hour * 3600 + when.minute * 60 + when.second
+        diff = actual - (due % 86400)
+        # A trip either side of midnight otherwise looks nearly a day out.
+        if diff > 43200:
+            diff -= 86400
+        elif diff < -43200:
+            diff += 86400
+        predicted_delay = round(diff / 60)
+
+    return {
+        "predicted": when.strftime("%H:%M:%S"),
+        "minutes_away": minutes_away,
+        "predicted_delay": predicted_delay,
+    }
+
+
 def delay_minutes(stops: list[dict], index: int | None, now: str) -> int | None:
     """
     How late the vehicle is, from when it is due at the stop it is heading for.
@@ -269,6 +459,29 @@ async def api_snapshot() -> dict:
     cache.touch()
     await wait_for_fresh(cache)
     return {"vehicles": cache.vehicles, "count": len(cache.vehicles), **cache.timing()}
+
+
+@app.get("/api/alerts")
+async def api_alerts() -> dict:
+    """Disruptions in force now, and any announced for later."""
+    cache: FeedCache = app.state.cache
+    cache.touch()
+    now = time.time()
+    active = cache.active_alerts()
+    upcoming = [a for a in cache.alerts if a["starts"] and a["starts"] > now]
+    return {
+        "alerts": active,
+        "count": len(active),
+        "upcoming": upcoming,
+        "mapped": sum(1 for a in active if a["stops"]),
+        "checked_at": (
+            datetime.fromtimestamp(time.time() - (time.monotonic() - cache.alerts_at)).isoformat(
+                timespec="seconds"
+            )
+            if cache.alerts_at
+            else None
+        ),
+    }
 
 
 @app.get("/api/vehicles")
@@ -313,7 +526,7 @@ def api_trip(trip_id: str, lat: float | None = None, lon: float | None = None) -
 
         rows = conn.execute(
             """SELECT st.stop_sequence, st.arrival_time, st.departure_time,
-                      s.stop_name, s.stop_lat, s.stop_lon
+                      s.stop_id, s.stop_name, s.stop_lat, s.stop_lon
                FROM stop_times st JOIN stops s ON s.stop_id = st.stop_id
                WHERE st.trip_id = ? ORDER BY CAST(st.stop_sequence AS INTEGER)""",
             (trip_id,),
@@ -321,17 +534,19 @@ def api_trip(trip_id: str, lat: float | None = None, lon: float | None = None) -
     finally:
         conn.close()
 
-    stops = [
-        {
+    cache: FeedCache = app.state.cache
+    stops = []
+    for seq, arrival, departure, stop_id, name, lat_, lon_ in rows:
+        stops.append({
             "sequence": seq,
             "arrival": arrival,
             "departure": departure,
+            "stop_id": stop_id,
             "name": name,
             "latitude": float(lat_) if lat_ else None,
             "longitude": float(lon_) if lon_ else None,
-        }
-        for seq, arrival, departure, name, lat_, lon_ in rows
-    ]
+            **describe_prediction(cache.predicted_arrival(trip_id, stop_id), arrival or departure),
+        })
     points = [
         (s["latitude"], s["longitude"]) if s["latitude"] is not None else None for s in stops
     ]
@@ -362,7 +577,19 @@ def api_trip(trip_id: str, lat: float | None = None, lon: float | None = None) -
         "route_type": route_type,
         "at_stop_index": at_index,
         "next_stop_index": next_index,
-        "delay_minutes": delay_minutes(stops, next_index, now),
+        # The operator's own figure when they publish one, ours only as backup.
+        "delay_minutes": (
+            stops[next_index]["predicted_delay"]
+            if next_index is not None and stops[next_index].get("predicted_delay") is not None
+            else delay_minutes(stops, next_index, now)
+        ),
+        "delay_source": (
+            "predicted"
+            if next_index is not None and stops[next_index].get("predicted_delay") is not None
+            else "timetable"
+        ),
+        "has_predictions": any(s["predicted"] for s in stops),
+        "alerts": cache.alerts_for({route_id}),
         "now": now,
         "shape": [[float(lat_), float(lon_)] for lat_, lon_ in shape],
         "stops": stops,
@@ -428,7 +655,7 @@ def departures_at(
     ]
 
 
-def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: list[dict], short_names: dict) -> list[dict]:
+def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: list[dict], short_names: dict, cache=None) -> list[dict]:
     """Live vehicles on a trip that calls at this stop, and how far off they are."""
     by_trip = {v["trip_id"]: v for v in vehicles if v.get("trip_id")}
     if not by_trip:
@@ -437,7 +664,7 @@ def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: lis
     marks = ",".join("?" * len(by_trip))
     stop_marks = ",".join("?" * len(stop_ids))
     calls = conn.execute(
-        f"""SELECT st.trip_id, st.stop_sequence, st.arrival_time, st.departure_time
+        f"""SELECT st.trip_id, st.stop_sequence, st.arrival_time, st.departure_time, st.stop_id
             FROM stop_times st
             WHERE st.stop_id IN ({stop_marks}) AND st.trip_id IN ({marks})""",
         (*stop_ids, *by_trip),
@@ -465,7 +692,7 @@ def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: lis
     )
 
     approaching = []
-    for trip_id, seq, arrival, departure in calls:
+    for trip_id, seq, arrival, departure, called_at in calls:
         vehicle = by_trip[trip_id]
         legs = sequences.get(trip_id)
         if not legs or vehicle["latitude"] is None:
@@ -478,6 +705,7 @@ def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: lis
         points = [(leg[1], leg[2]) for leg in legs]
         current = next_stop_by_position(points, position) or 0
         stops_away = target_index - current
+        predicted = cache.predicted_arrival(trip_id, called_at) if cache else None
         approaching.append({
             "vehicle_id": vehicle["vehicle_id"],
             "trip_id": trip_id,
@@ -486,14 +714,26 @@ def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: lis
             "type": vehicle["type"],
             "headsign": headsigns.get(trip_id),
             "speed": vehicle["speed"],
+            "occupancy_text": vehicle.get("occupancy_text"),
+            "wheelchair": vehicle.get("wheelchair"),
+            "air_conditioned": vehicle.get("air_conditioned"),
+            "schedule_relationship": vehicle.get("schedule_relationship"),
             "distance_m": round(metres_between(target, position)),
             "stops_away": stops_away,
             # Negative means it has already been past.
             "inbound": stops_away >= 0,
             "due": arrival or departure,
+            **describe_prediction(predicted, arrival or departure),
         })
 
-    approaching.sort(key=lambda a: (not a["inbound"], a["stops_away"], a["distance_m"]))
+    # Soonest first when we have a real prediction, falling back to stop count.
+    approaching.sort(
+        key=lambda a: (
+            not a["inbound"],
+            a["minutes_away"] if a["minutes_away"] is not None else 999,
+            a["stops_away"],
+        )
+    )
     return approaching
 
 
@@ -578,7 +818,7 @@ def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = N
         ).fetchall()
         short_names = {rid: (short or rid) for rid, _long, short, _type, _n in routes}
 
-        approaching = approaching_vehicles(conn, stop_ids, target, cache.vehicles, short_names)
+        approaching = approaching_vehicles(conn, stop_ids, target, cache.vehicles, short_names, cache)
 
         # The timetable side. Matters most on a quiet stop, where "no live
         # vehicle is coming" tells you nothing about when one actually will.
@@ -634,6 +874,8 @@ def api_stop(stop_id: str, from_time: str | None = None, to_time: str | None = N
         "approaching": approaching,
         "scheduled": scheduled,
         "next_service_day": next_day,
+        # Anything disrupting a route that calls here.
+        "alerts": cache.alerts_for({rid for rid, *_ in routes}),
         "window": {"from": window_from, "to": window_to},
         "now": now,
     }
