@@ -176,6 +176,64 @@
   .side-panel .alert .body { color: #6b5638; margin-top: 2px; }
   .side-panel .alert .when { color: #9a7f5a; margin-top: 3px; font-size: 11px; }
   .alert-pin { background: none; border: none; }
+  .place-pin { background: none; border: none; }
+
+  /* Journey planner, top-left above the trip panel. */
+  #plan {
+    position: absolute;
+    top: 84px;
+    left: 12px;
+    width: 310px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    z-index: 1001;
+    font-size: 13px;
+    display: none;
+    flex-direction: column;
+    max-height: calc(100% - 180px);
+  }
+  #plan.open { display: flex; }
+  #plan .head { padding: 10px 12px; border-bottom: 1px solid #ddd; }
+  #plan .head h2 { margin: 0 0 6px; font-size: 15px; }
+  #plan .row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+  #plan .dot {
+    width: 11px; height: 11px; border-radius: 50%; flex: none;
+    border: 2px solid white; box-shadow: 0 0 0 1px #999;
+  }
+  #plan .row input {
+    flex: 1; min-width: 0; font-size: 12px; padding: 3px 5px;
+    border: 1px solid #ccc; border-radius: 3px;
+  }
+  #plan .pick {
+    font-size: 11px; padding: 3px 7px; cursor: pointer;
+    border: 1px solid #ccc; background: #f4f4f4; border-radius: 3px; white-space: nowrap;
+  }
+  #plan .pick.armed { background: #1c6cb4; color: white; border-color: #1c6cb4; }
+  #plan .go {
+    width: 100%; margin-top: 6px; padding: 7px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; border-radius: 3px; background: #1c2b3a; color: white;
+  }
+  #plan .go:disabled { background: #aaa; cursor: default; }
+  #plan .results { overflow-y: auto; padding: 4px 0 8px; }
+  #plan .hint { color: #666; font-size: 12px; margin-top: 4px; }
+  .option {
+    padding: 8px 12px; border-bottom: 1px solid #eee; cursor: pointer;
+  }
+  .option:hover { background: #eef4fb; }
+  .option.chosen { background: #e2ecf7; }
+  .option .when {
+    font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .option .dur { color: #666; float: right; font-size: 12px; }
+  .option .modes { margin-top: 3px; }
+  .option .step { color: #555; font-size: 12px; margin-top: 2px; }
+  .option .walk { color: #4a7c59; }
   .side-panel .alert a { color: #1c6cb4; }
   .legend .alerts { margin-top: 4px; font-size: 12px; }
   .legend .alerts a { color: #b06a00; cursor: pointer; text-decoration: underline; }
@@ -299,6 +357,26 @@
     <span class="zoom" id="trip-back" style="display:none; margin-left:12px">&larr; Back to stop</span>
   </div>
   <div class="stops" id="trip-stops"></div>
+</div>
+
+<div id="plan">
+  <div class="head">
+    <h2>Plan a journey</h2>
+    <div class="row">
+      <span class="dot" style="background:#2e8b3d"></span>
+      <input id="plan-from" placeholder="Click the map to set your location" readonly>
+      <button class="pick" id="pick-from">Set</button>
+    </div>
+    <div class="row">
+      <span class="dot" style="background:#c0392b"></span>
+      <input id="plan-to" placeholder="Type a stop, or click the map">
+      <button class="pick" id="pick-to">Set</button>
+    </div>
+    <div id="plan-matches"></div>
+    <button class="go" id="plan-go" disabled>Find fastest route</button>
+    <div class="hint" id="plan-hint">Set both points to search.</div>
+  </div>
+  <div class="results" id="plan-results"></div>
 </div>
 
 <div id="stop" class="side-panel">
@@ -493,6 +571,211 @@
   document.addEventListener("click", (event) => {
     if (event.target.id === "alert-open") showAllAlerts();
   });
+
+  // --- Journey planner -----------------------------------------------------
+
+  const planLayer = L.layerGroup().addTo(map);
+  const pins = { from: null, to: null };
+  let picking = null;      // "from" or "to" while waiting for a map click
+  let planOptions = [];
+
+  function pinIcon(colour, letter) {
+    return L.divIcon({
+      className: "place-pin",
+      iconSize: [26, 34],
+      iconAnchor: [13, 33],
+      html:
+        `<svg width="26" height="34" viewBox="0 0 26 34">` +
+        `<path d="M13 33 C13 33 24 19 24 12 A11 11 0 1 0 2 12 C2 19 13 33 13 33 Z"` +
+        ` fill="${colour}" stroke="white" stroke-width="2"/>` +
+        `<text x="13" y="17" text-anchor="middle" font-size="12" font-weight="700"` +
+        ` fill="white" font-family="sans-serif">${letter}</text></svg>`,
+    });
+  }
+
+  function setPin(which, latlng, label) {
+    if (pins[which]) map.removeLayer(pins[which].marker);
+    const marker = L.marker(latlng, {
+      icon: pinIcon(which === "from" ? "#2e8b3d" : "#c0392b", which === "from" ? "A" : "B"),
+      draggable: true,
+    }).addTo(map);
+    marker.on("dragend", () => {
+      pins[which].latlng = marker.getLatLng();
+      document.getElementById(`plan-${which}`).value =
+        `${pins[which].latlng.lat.toFixed(5)}, ${pins[which].latlng.lng.toFixed(5)}`;
+      refreshPlanButton();
+    });
+    pins[which] = { marker, latlng: L.latLng(latlng) };
+    document.getElementById(`plan-${which}`).value =
+      label || `${pins[which].latlng.lat.toFixed(5)}, ${pins[which].latlng.lng.toFixed(5)}`;
+    refreshPlanButton();
+  }
+
+  function refreshPlanButton() {
+    document.getElementById("plan-go").disabled = !(pins.from && pins.to);
+  }
+
+  function armPick(which) {
+    picking = picking === which ? null : which;
+    ["from", "to"].forEach((k) =>
+      document.getElementById(`pick-${k}`).classList.toggle("armed", picking === k)
+    );
+    document.getElementById("plan-hint").textContent = picking
+      ? `Click the map to place ${picking === "from" ? "your location" : "the destination"}.`
+      : "Set both points to search.";
+  }
+
+  map.on("click", (event) => {
+    if (!picking) return;
+    setPin(picking, event.latlng);
+    armPick(picking);
+  });
+
+  function describeLeg(leg) {
+    const colour = TYPE_COLORS[normaliseType(leg.type)] || TYPE_COLORS.unknown;
+    return `<span class="badge" style="background:${colour}">${leg.route}</span>` +
+           `${leg.depart.slice(0, 5)} ${leg.board}`;
+  }
+
+  function drawPlan(option) {
+    planLayer.clearLayers();
+    if (!option) return;
+    // Walking legs dashed, riding legs solid in the mode's colour.
+    const walkStyle = { color: "#2e8b3d", weight: 4, dashArray: "2 7", opacity: 0.9 };
+    if (pins.from) {
+      L.polyline([pins.from.latlng, [option.walk_start.latitude, option.walk_start.longitude]],
+        walkStyle).addTo(planLayer);
+    }
+    if (pins.to) {
+      L.polyline([[option.walk_end.latitude, option.walk_end.longitude], pins.to.latlng],
+        walkStyle).addTo(planLayer);
+    }
+    option.legs.forEach((leg) => {
+      fetch(`api/trip/${encodeURIComponent(leg.trip_id)}`)
+        .then((r) => r.json())
+        .then((trip) => {
+          const colour = TYPE_COLORS[normaliseType(leg.type)] || TYPE_COLORS.unknown;
+          const path = trip.shape && trip.shape.length ? trip.shape : [];
+          if (!path.length) return;
+          L.polyline(path, { color: "white", weight: 8, opacity: 0.85 }).addTo(planLayer);
+          L.polyline(path, { color: colour, weight: 5, opacity: 0.95 }).addTo(planLayer);
+          addDirectionArrows(path, colour, planLayer, 6, 15);
+        })
+        .catch((err) => console.error("Drawing plan leg failed:", err));
+    });
+  }
+
+  function renderPlan(data) {
+    const results = document.getElementById("plan-results");
+    planOptions = data.journeys || [];
+    if (!planOptions.length) {
+      results.innerHTML = `<div class="option">${data.message || "No journey found in the next two hours."}</div>`;
+      return;
+    }
+    results.innerHTML = planOptions
+      .map((j, i) => {
+        const legs = j.legs.map(describeLeg).join('<div class="step">then </div>');
+        const change = j.change
+          ? `<div class="step walk">change at ${j.change.from} - ${j.change.metres} m walk, ${j.change.wait_minutes} min wait</div>`
+          : "";
+        return `<div class="option" data-i="${i}">
+            <span class="when">${j.depart_clock.slice(0, 5)} &rarr; ${j.arrive_clock.slice(0, 5)}</span>
+            <span class="dur">${j.total_minutes} min</span>
+            <div class="modes">${legs}</div>
+            <div class="step walk">walk ${j.walk_start.metres} m to ${j.walk_start.name}</div>
+            ${change}
+            <div class="step walk">walk ${j.walk_end.metres} m at the other end</div>
+          </div>`;
+      })
+      .join("");
+    // Show the best one straight away.
+    results.querySelector(".option").classList.add("chosen");
+    drawPlan(planOptions[0]);
+  }
+
+  document.getElementById("plan-results").addEventListener("click", (event) => {
+    const row = event.target.closest(".option[data-i]");
+    if (!row) return;
+    document.querySelectorAll("#plan-results .option").forEach((el) => el.classList.remove("chosen"));
+    row.classList.add("chosen");
+    drawPlan(planOptions[+row.dataset.i]);
+  });
+
+  document.getElementById("pick-from").addEventListener("click", () => armPick("from"));
+  document.getElementById("pick-to").addEventListener("click", () => armPick("to"));
+
+  // Typing a destination searches stop names.
+  let placeTimer = null;
+  document.getElementById("plan-to").addEventListener("input", (event) => {
+    clearTimeout(placeTimer);
+    const q = event.target.value.trim();
+    const box = document.getElementById("plan-matches");
+    if (q.length < 3) return (box.innerHTML = "");
+    placeTimer = setTimeout(async () => {
+      try {
+        const data = await (await fetch(`api/places?q=${encodeURIComponent(q)}`)).json();
+        box.innerHTML = data.places
+          .map((p) => `<div class="option" data-place='${JSON.stringify(p).replace(/'/g, "&#39;")}'>${p.name}</div>`)
+          .join("");
+      } catch (err) {
+        console.error("Place search failed:", err);
+      }
+    }, 250);
+  });
+
+  document.getElementById("plan-matches").addEventListener("click", (event) => {
+    const row = event.target.closest("[data-place]");
+    if (!row) return;
+    const place = JSON.parse(row.dataset.place);
+    setPin("to", [place.latitude, place.longitude], place.name);
+    document.getElementById("plan-matches").innerHTML = "";
+  });
+
+  document.getElementById("plan-go").addEventListener("click", async () => {
+    const hint = document.getElementById("plan-hint");
+    hint.textContent = "Searching...";
+    const query = new URLSearchParams({
+      from_lat: pins.from.latlng.lat, from_lon: pins.from.latlng.lng,
+      to_lat: pins.to.latlng.lat, to_lon: pins.to.latlng.lng,
+    });
+    try {
+      const data = await (await fetch(`api/plan?${query}`)).json();
+      hint.textContent = `Searched from ${(data.searched_from || "").slice(0, 5)}.`;
+      renderPlan(data);
+    } catch (err) {
+      console.error("Planning failed:", err);
+      hint.textContent = "Search failed.";
+    }
+  });
+
+  // --- Whole network backdrop ----------------------------------------------
+
+  const networkLayer = L.layerGroup();
+  let networkLoaded = false;
+
+  async function loadNetwork() {
+    if (networkLoaded) return;
+    networkLoaded = true;
+    try {
+      const data = await (await fetch("api/network")).json();
+      // Canvas renderer: 1,900 polylines as SVG would crawl.
+      const renderer = L.canvas({ padding: 0.3 });
+      ["bus", "tram", "train", "ferry"].forEach((mode) => {
+        (data.lines[mode] || []).forEach((line) => {
+          L.polyline(line, {
+            renderer,
+            color: TYPE_COLORS[mode],
+            weight: mode === "bus" ? 1.2 : 2.2,
+            opacity: mode === "bus" ? 0.35 : 0.7,
+            interactive: false,
+          }).addTo(networkLayer);
+        });
+      });
+    } catch (err) {
+      console.error("Loading network failed:", err);
+      networkLoaded = false;
+    }
+  }
 
   // Panel goes up first so there is somewhere to report progress and errors.
   addFilterPanel();
@@ -1384,6 +1667,16 @@
              Show disruptions
            </label>
            <div class="alerts" id="alert-summary"></div>
+         </div>
+         <div class="live">
+           <label>
+             <input type="checkbox" id="network-toggle">
+             Show every route
+           </label>
+           <label>
+             <input type="checkbox" id="plan-toggle">
+             Plan a journey
+           </label>
          </div>`;
 
       // Stops checkbox clicks from panning the map underneath.
@@ -1411,6 +1704,22 @@
       div.querySelector("#alert-toggle").addEventListener("change", (event) => {
         if (event.target.checked) alertLayer.addTo(map);
         else map.removeLayer(alertLayer);
+      });
+
+      div.querySelector("#network-toggle").addEventListener("change", async (event) => {
+        if (!event.target.checked) return map.removeLayer(networkLayer);
+        stopsHint("Loading every route...");
+        await loadNetwork();
+        networkLayer.addTo(map).bringToBack();
+        stopsHint("");
+      });
+
+      div.querySelector("#plan-toggle").addEventListener("change", (event) => {
+        document.getElementById("plan").classList.toggle("open", event.target.checked);
+        if (!event.target.checked) {
+          planLayer.clearLayers();
+          picking = null;
+        }
       });
 
       return div;

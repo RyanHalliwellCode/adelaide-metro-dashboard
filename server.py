@@ -23,6 +23,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
 import db
+import journey
 from main import (
     SERVICE_ALERTS_URL,
     TRIP_UPDATES_URL,
@@ -224,6 +225,7 @@ async def lifespan(app: FastAPI):
     try:
         app.state.route_types = db.route_types()
         db.ensure_stop_modes()
+        db.ensure_walk_transfers()
         db.prepare_recorder()
         recording = True
     except db.MissingDatabase as exc:
@@ -735,6 +737,85 @@ def approaching_vehicles(conn, stop_ids: list[str], target: tuple, vehicles: lis
         )
     )
     return approaching
+
+
+@app.get("/api/plan")
+def api_plan(
+    from_lat: float, from_lon: float, to_lat: float, to_lon: float, after: str | None = None
+) -> dict:
+    """
+    Fastest way between two points, walking included at both ends.
+
+    Every stop within range of the start is considered, not just the nearest -
+    so a stop five minutes further away wins when the service from it is
+    fifteen minutes better.
+    """
+    if not db.DB_PATH.exists():
+        raise HTTPException(503, "gtfs.db missing - run 'python gtfs_static.py' first.")
+    return journey.plan((from_lat, from_lon), (to_lat, to_lon), normalise_time(after))
+
+
+@app.get("/api/places")
+def api_places(q: str, limit: int = 8) -> dict:
+    """Stop and station name search, for typing a destination instead of clicking."""
+    conn = open_db()
+    try:
+        rows = conn.execute(
+            """SELECT s.stop_id, s.stop_name, s.stop_lat, s.stop_lon, m.modes
+               FROM stops s LEFT JOIN stop_modes m ON m.stop_id = s.stop_id
+               WHERE s.parent_station = '' AND s.stop_name LIKE ?
+               ORDER BY LENGTH(s.stop_name) LIMIT ?""",
+            (f"%{q}%", limit),
+        ).fetchall()
+    finally:
+        conn.close()
+    return {
+        "places": [
+            {
+                "stop_id": sid,
+                "name": name,
+                "latitude": float(lat),
+                "longitude": float(lon),
+                "modes": modes.split(",") if modes else [],
+            }
+            for sid, name, lat, lon, modes in rows
+        ]
+    }
+
+
+@app.get("/api/network")
+def api_network(every: int = 12) -> dict:
+    """
+    Every route shape in the network, thinned, for drawing as a backdrop.
+    977,376 points is too many to hand a browser, so take every nth.
+    """
+    conn = open_db()
+    try:
+        kinds = {
+            shape_id: db.gtfs_type_name(route_type)
+            for shape_id, route_type in conn.execute(
+                """SELECT DISTINCT t.shape_id, r.route_type FROM trips t
+                   JOIN routes r ON r.route_id = t.route_id WHERE t.shape_id != ''"""
+            )
+        }
+        points: dict[str, list] = {}
+        for shape_id, lat, lon in conn.execute(
+            """SELECT shape_id, shape_pt_lat, shape_pt_lon FROM shapes
+               ORDER BY shape_id, CAST(shape_pt_sequence AS INTEGER)"""
+        ):
+            points.setdefault(shape_id, []).append([round(float(lat), 5), round(float(lon), 5)])
+    finally:
+        conn.close()
+
+    lines: dict[str, list] = {}
+    for shape_id, pts in points.items():
+        thin = pts[::every]
+        if thin[-1] != pts[-1]:
+            thin.append(pts[-1])
+        if len(thin) > 1:
+            lines.setdefault(kinds.get(shape_id, "bus"), []).append(thin)
+
+    return {"lines": lines, "counts": {k: len(v) for k, v in lines.items()}}
 
 
 @app.get("/api/stops")

@@ -1,6 +1,7 @@
 # Everything that touches gtfs.db lives here, so the rest of the project never
 # opens a connection or hardcodes a query itself.
 
+import math
 import sqlite3
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -119,6 +120,101 @@ def ensure_stop_modes() -> None:
         print("Building stop_modes lookup (one-off, a couple of seconds)...", flush=True)
         count = build_stop_modes(conn)
         print(f"stop_modes: {count:,} stops classified", flush=True)
+
+
+# --- Walking between nearby stops --------------------------------------------
+# Buses and trains never share a stop_id, not even at an interchange: Elizabeth
+# Interchange and Elizabeth Railway Station are two records 50 m apart. Matching
+# transfers on stop_id alone finds no journey at all from anywhere without rail,
+# so changes have to be matched on distance.
+
+TRANSFER_METRES = 350
+WALK_SPEED_MPS = 1.3
+GRID_CELL = 0.004  # about 450 m, so neighbours are always within one cell
+
+WALK_SQL = """
+DROP TABLE IF EXISTS walk_transfers;
+CREATE TABLE walk_transfers (from_stop TEXT, to_stop TEXT, metres REAL);
+CREATE INDEX idx_walk_from ON walk_transfers (from_stop);
+"""
+
+
+def _grid(stops: list[tuple]) -> tuple[dict, dict]:
+    grid: dict[tuple, list] = {}
+    coords = {}
+    for stop_id, lat, lon in stops:
+        lat, lon = float(lat), float(lon)
+        coords[stop_id] = (lat, lon)
+        grid.setdefault((int(lat / GRID_CELL), int(lon / GRID_CELL)), []).append(stop_id)
+    return grid, coords
+
+
+def metres_between(a: tuple, b: tuple) -> float:
+    return math.hypot(
+        (a[0] - b[0]) * 111320,
+        (a[1] - b[1]) * 111320 * math.cos(math.radians(a[0])),
+    )
+
+
+def build_walk_transfers(conn: sqlite3.Connection) -> int:
+    conn.executescript(WALK_SQL)
+    stops = conn.execute("SELECT stop_id, stop_lat, stop_lon FROM stops WHERE stop_lat != ''").fetchall()
+    grid, coords = _grid(stops)
+
+    rows = []
+    for stop_id, here in coords.items():
+        gy, gx = int(here[0] / GRID_CELL), int(here[1] / GRID_CELL)
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                for other in grid.get((gy + dy, gx + dx), ()):
+                    if other == stop_id:
+                        continue
+                    distance = metres_between(here, coords[other])
+                    if distance <= TRANSFER_METRES:
+                        rows.append((stop_id, other, round(distance, 1)))
+
+    conn.executemany("INSERT INTO walk_transfers VALUES (?, ?, ?)", rows)
+    conn.commit()
+    return len(rows)
+
+
+def ensure_walk_transfers() -> None:
+    with connect(writable=True) as conn:
+        if conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='walk_transfers'"
+        ).fetchone():
+            return
+        print("Building walk_transfers lookup (one-off)...", flush=True)
+        print(f"walk_transfers: {build_walk_transfers(conn):,} pairs within {TRANSFER_METRES} m", flush=True)
+
+
+def stops_near(conn: sqlite3.Connection, lat: float, lon: float, radius: float) -> list[dict]:
+    """Stops you could walk to from a point, nearest first."""
+    span = radius / 111320
+    rows = conn.execute(
+        """SELECT s.stop_id, s.stop_name, s.stop_lat, s.stop_lon, m.modes
+           FROM stops s LEFT JOIN stop_modes m ON m.stop_id = s.stop_id
+           WHERE s.parent_station = ''
+             AND CAST(s.stop_lat AS REAL) BETWEEN ? AND ?
+             AND CAST(s.stop_lon AS REAL) BETWEEN ? AND ?""",
+        (lat - span, lat + span, lon - span * 1.3, lon + span * 1.3),
+    ).fetchall()
+
+    near = []
+    for stop_id, name, slat, slon, modes in rows:
+        distance = metres_between((lat, lon), (float(slat), float(slon)))
+        if distance <= radius:
+            near.append({
+                "stop_id": stop_id,
+                "name": name,
+                "latitude": float(slat),
+                "longitude": float(slon),
+                "metres": round(distance),
+                "walk_seconds": int(distance / WALK_SPEED_MPS),
+                "modes": modes.split(",") if modes else [],
+            })
+    near.sort(key=lambda s: s["metres"])
+    return near
 
 
 # --- Recorded live positions -------------------------------------------------
